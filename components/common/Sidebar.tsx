@@ -1,0 +1,60 @@
+import Link from "next/link";
+import {
+  LayoutDashboard,
+  Building2,
+  Users,
+  CreditCard,
+  ShieldCheck,
+  FileText,
+  Plug,
+  Headphones,
+  ClipboardList,
+  LayoutTemplate,
+  FileBarChart,
+  Settings,
+  Zap,
+} from "lucide-react";
+
+export function Sidebar() {
+  const items = [
+    { title: "Dashboard", icon: LayoutDashboard, href: "/", active: true },
+    { title: "Agencies", icon: Building2, href: "/agencies" },
+    { title: "Users & Roles", icon: Users, href: "/users" },
+    { title: "Billing & Subscriptions", icon: CreditCard, href: "/billing" },
+    { title: "Compliance & Risk", icon: ShieldCheck, href: "/compliance" },
+    { title: "Documents & Licenses", icon: FileText, href: "/documents" },
+    { title: "Integrations & Health", icon: Plug, href: "/integrations" },
+    { title: "Support / Tickets", icon: Headphones, href: "/support" },
+    { title: "Audit Logs", icon: ClipboardList, href: "/audit-logs" },
+    { title: "Templates & Forms", icon: LayoutTemplate, href: "/templates" },
+    { title: "Reports & Exports", icon: FileBarChart, href: "/reports" },
+    { title: "Global Settings", icon: Settings, href: "/settings" },
+  ];
+
+  return (
+    <div className="w-64 min-h-screen bg-card flex flex-col hidden md:flex">
+      <div className="h-16 flex items-center px-6">
+        <div className="flex items-center gap-2 text-primary font-semibold text-xl">
+          <Zap className="w-6 h-6 fill-primary" />
+          <span>QLOCKCARE</span>
+        </div>
+      </div>
+      <nav className="flex-1 py-6 px-4 flex flex-col gap-1 overflow-y-auto">
+        {items.map((item) => (
+          <Link
+            key={item.title}
+            href={item.href}
+            className={`flex items-center gap-3 px-4 py-3 rounded-[12px] text-sm font-medium transition-colors ${
+              item.active
+                ? "bg-primary text-primary-foreground shadow-[0px_1px_4px_rgba(0,0,0,0.08)]"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+          >
+            <item.icon className="w-5 h-5" />
+            {item.title}
+          </Link>
+        ))}
+      </nav>
+    </div>
+  );
+}
