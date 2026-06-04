@@ -1,36 +1,31 @@
 "use client";
 
-import React from "react";
-import SummaryCard from "../../components/common/SummaryCard";
-import { DataTable, Column } from "../../components/common/DataTable";
+import React, { useState } from "react";
+import { Search } from "lucide-react";
+import { ClientsTable } from "../../components/clients/ClientsTable";
+import { ClientsSummaryCards } from "../../components/clients/ClientsSummaryCards";
 
 export default function ClientsPage() {
-  const clients = [
-    { name: "Acme Corp", industry: "Manufacturing", status: "Active" },
-    { name: "Beta Health", industry: "Healthcare", status: "Inactive" },
-    { name: "Gamma Solutions", industry: "Technology", status: "Active" },
-    { name: "Delta Services", industry: "Logistics", status: "Active" },
-  ];
-
-  const total = clients.length;
-  const active = clients.filter((c) => c.status === "Active").length;
-
-  const columns: Column<typeof clients[0]>[] = [
-    { header: "Client", accessor: "name" },
-    { header: "Industry", accessor: "industry" },
-    { header: "Status", accessor: "status" },
-  ];
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <main className="p-6 space-y-6">
-      {/* Summary cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <SummaryCard title="Total Clients" value={total} />
-        <SummaryCard title="Active Clients" value={active} />
+      <ClientsSummaryCards />
+      <div className="overflow-x-auto bg-card rounded-[12px] shadow-[0px_1px_4px_rgba(0,0,0,0.08)] overflow-hidden">
+        <div className="flex items-center justify-end gap-2 p-2">
+          <div className="relative flex items-center gap-2">
+            <Search className="absolute left-3 text-muted-foreground w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search clients..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="border border-border rounded-[12px] pl-10 pr-4 py-2"
+            />
+          </div>
+        </div>
+        <ClientsTable searchQuery={searchQuery} />
       </div>
-
-      {/* Data table */}
-      <DataTable columns={columns} data={clients} filterAccessor="name" />
     </main>
   );
 }

@@ -1,48 +1,35 @@
 import React, { useState, useEffect } from "react";
-import { Edit, Eye, Trash2 } from "lucide-react";
-import { AgencyViewModal, Agency } from "./AgencyViewModal";
-import { agencies } from "./agencies";
-import { AgencyEditModal } from "./AgencyEditModal";
-import { AgencyDeleteModal } from "./AgencyDeleteModal";
+import { Eye } from "lucide-react";
+import { ClientViewModal, Client } from "./ClientViewModal";
+import { clients } from "./client";
 
-
-export function AgenciesTable({ searchQuery = "" }: { searchQuery?: string }) {
-  const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
+export function ClientsTable({ searchQuery = "" }: { searchQuery?: string }) {
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [viewOpen, setViewOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const openView = (agency: Agency) => {
-    setSelectedAgency(agency);
+  const openView = (client: Client) => {
+    setSelectedClient(client);
     setViewOpen(true);
-  };
-  const openEdit = (agency: Agency) => {
-    setSelectedAgency(agency);
-    setEditOpen(true);
-  };
-  const openDelete = (agency: Agency) => {
-    setSelectedAgency(agency);
-    setDeleteOpen(true);
   };
   const closeModals = () => {
     setViewOpen(false);
-    setEditOpen(false);
-    setDeleteOpen(false);
-    setSelectedAgency(null);
+    setSelectedClient(null);
   };
+
+
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  const filteredAgencies = agencies.filter((agency) =>
-    agency.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredClients = clients.filter((client) =>
+    client.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);
 
-  const totalPages = Math.ceil(filteredAgencies.length / ITEMS_PER_PAGE);
-  const currentData = filteredAgencies.slice(
+  const totalPages = Math.ceil(filteredClients.length / ITEMS_PER_PAGE);
+  const currentData = filteredClients.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -52,46 +39,48 @@ export function AgenciesTable({ searchQuery = "" }: { searchQuery?: string }) {
       <table className="w-full text-left text-[14px] text-foreground">
         <thead className="bg-[#066a5f] text-[12px] tracking-[0.05em] font-semibold text-white uppercase border-b border-border">
           <tr>
-            <th className="px-6 py-4">Agency</th>
-            <th className="px-6 py-4">Staff</th>
+            <th className="px-6 py-4">SL No.</th>
+            <th className="px-6 py-4">Client</th>
             <th className="px-6 py-4">Status</th>
-            <th className="px-6 py-4">Services</th>
-            <th className="px-6 py-4">Created On</th>
+            <th className="px-6 py-4">Email</th>
+            <th className="px-6 py-4">Mobile</th>
+            <th className="px-6 py-4">Address</th>
+            <th className="px-6 py-4">Guardian</th>
+            <th className="px-6 py-4">Guardian Mobile</th>
+            <th className="px-6 py-4">Guardian Email</th>
             <th className="px-6 py-4 text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
           {currentData.map((item, idx) => (
             <tr key={idx} className="border-b border-border hover:bg-muted/20 transition-colors last:border-0">
+              <td className="px-6 py-4 font-medium">{item.sl}</td>
               <td className="px-6 py-4 font-medium">{item.name}</td>
               <td className="px-6 py-4">
                 <span className={`text-[12px] font-semibold px-2 py-1 rounded-[100px] ${item.status === "Active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                   {item.status}
                 </span>
               </td>
-              <td className="px-6 py-4">{item.employeeCount}</td>
-              <td className="px-6 py-4">{item.services}</td>
-              <td className="px-6 py-4 text-muted-foreground">{item.createdAt}</td>
+              <td className="px-6 py-4">{item.email}</td>
+              <td className="px-6 py-4">{item.mobile}</td>
+              <td className="px-6 py-4">{item.address}</td>
+              <td className="px-6 py-4">{item.guardianName}</td>
+              <td className="px-6 py-4">{item.guardianMobile}</td>
+              <td className="px-6 py-4">{item.guardianEmail}</td>
               <td className="px-6 py-4 flex space-x-2 justify-center">
                 <button aria-label="View" onClick={() => openView(item)} className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground">
                   <Eye className="w-5 h-5" />
-                </button>
-                <button aria-label="Edit" onClick={() => openEdit(item)} className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground">
-                  <Edit className="w-5 h-5" />
-                </button>
-                <button aria-label="Delete" onClick={() => openDelete(item)} className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground">
-                  <Trash2 className="w-5 h-5" />
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
+      
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-white">
           <div className="text-sm text-muted-foreground">
-            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredAgencies.length)} of {filteredAgencies.length} entries
+            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredClients.length)} of {filteredClients.length} entries
           </div>
           <div className="flex space-x-2">
             <button
@@ -123,19 +112,9 @@ export function AgenciesTable({ searchQuery = "" }: { searchQuery?: string }) {
         </div>
       )}
 
-      <AgencyViewModal
+      <ClientViewModal
         isOpen={viewOpen}
-        agency={selectedAgency}
-        onClose={closeModals}
-      />
-      <AgencyEditModal
-        isOpen={editOpen}
-        agency={selectedAgency}
-        onClose={closeModals}
-      />
-      <AgencyDeleteModal
-        isOpen={deleteOpen}
-        agency={selectedAgency}
+        client={selectedClient}
         onClose={closeModals}
       />
     </main>
