@@ -53,19 +53,11 @@ export function GrowthCharts() {
   };
 
   const userGrowthData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     datasets: [
       {
-        label: 'Staff',
-        data: [120, 190, 300, 500, 800, 1200],
-        borderColor: '#004e45',
-        backgroundColor: '#a1f2e3',
-        tension: 0.4,
-        fill: true,
-      },
-      {
         label: 'Clients',
-        data: [100, 150, 200, 250, 400, 600],
+        data: [100, 150, 200, 250, 400, 600, 700, 800, 900, 1000, 1100, 1200],
         borderColor: '#29685e',
         backgroundColor: '#afefe2',
         tension: 0.4,
@@ -74,11 +66,11 @@ export function GrowthCharts() {
   };
 
   const agenciesGrowthData = {
-    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     datasets: [
       {
         label: 'New Agencies',
-        data: [12, 19, 3, 5],
+        data: [12, 19, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80],
         backgroundColor: '#004e45',
         borderRadius: 4,
       }
@@ -86,13 +78,13 @@ export function GrowthCharts() {
   };
 
   const earningGrowthData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     datasets: [
       {
         label: 'Revenue ($K)',
-        data: [45, 52, 68, 74, 90, 124],
+        data: [45, 52, 68, 74, 90, 124, 150, 180, 210, 240, 270, 300],
         borderColor: '#066a5f',
-        backgroundColor: 'rgba(6, 106, 95, 0.1)',
+        backgroundColor: '#a1f2e3',
         tension: 0.4,
         fill: true,
       }
@@ -104,7 +96,7 @@ export function GrowthCharts() {
       <div className="bg-card rounded-[12px] p-6 shadow-[0px_1px_4px_rgba(0,0,0,0.08)] flex flex-col">
         <h3 className="text-foreground font-semibold text-lg mb-4">User Growth</h3>
         <div className="flex-1 min-h-[250px]">
-          <Line data={userGrowthData} options={chartOptions} />
+          <Bar data={userGrowthData} options={chartOptions} />
         </div>
       </div>
       <div className="bg-card rounded-[12px] p-6 shadow-[0px_1px_4px_rgba(0,0,0,0.08)] flex flex-col">
@@ -116,7 +108,7 @@ export function GrowthCharts() {
       <div className="bg-card rounded-[12px] p-6 shadow-[0px_1px_4px_rgba(0,0,0,0.08)] flex flex-col">
         <h3 className="text-foreground font-semibold text-lg mb-4">Earning Growth</h3>
         <div className="flex-1 min-h-[250px]">
-          <Line data={earningGrowthData} options={chartOptions} />
+          <Bar data={earningGrowthData} options={chartOptions} />
         </div>
       </div>
     </div>
