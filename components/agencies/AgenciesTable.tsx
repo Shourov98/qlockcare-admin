@@ -4,6 +4,7 @@ import { AgencyViewModal, Agency } from "./AgencyViewModal";
 import { agencies } from "./agencies";
 import { AgencyEditModal } from "./AgencyEditModal";
 import { AgencyDeleteModal } from "./AgencyDeleteModal";
+import { Pagination } from "../common/Pagination";
 
 
 export function AgenciesTable({ searchQuery = "" }: { searchQuery?: string }) {
@@ -88,40 +89,14 @@ export function AgenciesTable({ searchQuery = "" }: { searchQuery?: string }) {
         </tbody>
       </table>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-white">
-          <div className="text-sm text-muted-foreground">
-            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredAgencies.length)} of {filteredAgencies.length} entries
-          </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 border border-border rounded-md text-sm disabled:opacity-50 hover:bg-muted/50 transition-colors"
-            >
-              Previous
-            </button>
-            <div className="flex items-center space-x-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-md text-sm ${currentPage === page ? "bg-primary text-primary-foreground" : "hover:bg-muted/50 transition-colors"}`}
-                >
-                  {page}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 border border-border rounded-md text-sm disabled:opacity-50 hover:bg-muted/50 transition-colors"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={filteredAgencies.length}
+        itemsPerPage={ITEMS_PER_PAGE}
+        onPageChange={setCurrentPage}
+        itemName="entries"
+      />
 
       <AgencyViewModal
         isOpen={viewOpen}
