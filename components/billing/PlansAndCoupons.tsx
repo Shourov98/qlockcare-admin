@@ -1,15 +1,43 @@
-import React from "react";
+import React, { useState } from "react";
 import { Check, Edit, Trash2, Plus } from "lucide-react";
 import { plansData, couponsData } from "./billing";
+import { PlanModal } from "./PlanModal";
+import { CouponModal } from "./CouponModal";
+import { DeleteCouponModal } from "./DeleteCouponModal";
 
 export function PlansAndCoupons() {
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+
+  const [selectedCoupon, setSelectedCoupon] = useState<any>(null);
+  const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
+  const [isDeleteCouponModalOpen, setIsDeleteCouponModalOpen] = useState(false);
+
+  const openPlanModal = (plan?: any) => {
+    setSelectedPlan(plan || null);
+    setIsPlanModalOpen(true);
+  };
+
+  const openCouponModal = (coupon?: any) => {
+    setSelectedCoupon(coupon || null);
+    setIsCouponModalOpen(true);
+  };
+
+  const openDeleteCouponModal = (coupon: any) => {
+    setSelectedCoupon(coupon);
+    setIsDeleteCouponModalOpen(true);
+  };
+
   return (
     <div className="space-y-8">
       {/* Plans Section */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-foreground tracking-tight">Subscription Plans</h2>
-          <button className="flex items-center gap-2 bg-[#066a5f] text-white px-4 py-2 rounded-[8px] text-sm font-medium hover:bg-[#05584f] transition-colors">
+          <button 
+            onClick={() => openPlanModal()}
+            className="flex items-center gap-2 bg-[#066a5f] text-white px-4 py-2 rounded-[8px] text-sm font-medium hover:bg-[#05584f] transition-colors"
+          >
             <Plus className="w-4 h-4" />
             Add Plan
           </button>
@@ -20,7 +48,7 @@ export function PlansAndCoupons() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-foreground">{plan.name}</h3>
                 <div className="flex gap-2">
-                  <button className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Edit className="w-4 h-4" /></button>
+                  <button onClick={() => openPlanModal(plan)} className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Edit className="w-4 h-4" /></button>
                 </div>
               </div>
               <div className="mb-6">
@@ -46,7 +74,10 @@ export function PlansAndCoupons() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-foreground tracking-tight">Active Coupons</h2>
-          <button className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-[8px] text-sm font-medium transition-colors">
+          <button 
+            onClick={() => openCouponModal()}
+            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-[8px] text-sm font-medium transition-colors"
+          >
             <Plus className="w-4 h-4" />
             Create Coupon
           </button>
@@ -77,10 +108,10 @@ export function PlansAndCoupons() {
                       </span>
                     </td>
                     <td className="px-6 py-4 flex space-x-2 justify-center">
-                      <button aria-label="Edit" className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground">
+                      <button onClick={() => openCouponModal(coupon)} aria-label="Edit" className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground">
                         <Edit className="w-5 h-5" />
                       </button>
-                      <button aria-label="Delete" className="p-2 rounded-full hover:bg-muted/20 transition-colors text-red-600">
+                      <button onClick={() => openDeleteCouponModal(coupon)} aria-label="Delete" className="p-2 rounded-full transition-colors text-primary hover:bg-muted/20">
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </td>
@@ -91,6 +122,29 @@ export function PlansAndCoupons() {
           </div>
         </div>
       </section>
+
+      {/* Modals */}
+      {isPlanModalOpen && (
+        <PlanModal 
+          item={selectedPlan} 
+          onClose={() => setIsPlanModalOpen(false)} 
+          onSave={() => console.log("Plan saved")} 
+        />
+      )}
+      {isCouponModalOpen && (
+        <CouponModal 
+          item={selectedCoupon} 
+          onClose={() => setIsCouponModalOpen(false)} 
+          onSave={() => console.log("Coupon saved")} 
+        />
+      )}
+      {isDeleteCouponModalOpen && selectedCoupon && (
+        <DeleteCouponModal 
+          item={selectedCoupon} 
+          onClose={() => setIsDeleteCouponModalOpen(false)} 
+          onConfirm={() => console.log("Coupon deleted")} 
+        />
+      )}
     </div>
   );
 }

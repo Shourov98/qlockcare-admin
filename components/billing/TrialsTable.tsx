@@ -2,10 +2,33 @@ import React, { useState, useEffect } from "react";
 import { Mail, ShieldAlert } from "lucide-react";
 import { trialsData } from "./billing";
 import { Pagination } from "../common/Pagination";
+import { SendEmailModal } from "./SendEmailModal";
+import { EndTrialModal } from "./EndTrialModal";
 
 export function TrialsTable({ searchQuery = "" }: { searchQuery?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
+
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedAction, setSelectedAction] = useState<"email" | "end" | null>(null);
+
+  const openModal = (item: any, action: "email" | "end") => {
+    setSelectedItem(item);
+    setSelectedAction(action);
+  };
+
+  const closeModal = () => {
+    setSelectedItem(null);
+    setSelectedAction(null);
+  };
+
+  const handleSendEmail = (subject: string, message: string) => {
+    console.log("Email sent to", selectedItem?.agencyName, { subject, message });
+  };
+
+  const handleEndTrial = () => {
+    console.log("Ended trial for", selectedItem?.agencyName);
+  };
 
   const filteredTrials = trialsData.filter((trial) =>
     trial.agencyName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -59,11 +82,19 @@ export function TrialsTable({ searchQuery = "" }: { searchQuery?: string }) {
                 </span>
               </td>
               <td className="px-6 py-4 flex space-x-2 justify-center">
-                <button aria-label="Send Email" className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground">
+                <button 
+                  onClick={() => openModal(item, "email")}
+                  aria-label="Send Email" 
+                  className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground"
+                >
                   <Mail className="w-5 h-5" />
                 </button>
                 {item.status === "Active" && (
-                  <button aria-label="End Trial" className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground0">
+                  <button 
+                    onClick={() => openModal(item, "end")}
+                    aria-label="End Trial" 
+                    className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground0"
+                  >
                     <ShieldAlert className="w-5 h-5" />
                   </button>
                 )}
@@ -81,6 +112,22 @@ export function TrialsTable({ searchQuery = "" }: { searchQuery?: string }) {
         onPageChange={setCurrentPage}
         itemName="trials"
       />
+
+      {/* Modals */}
+      {selectedAction === "email" && selectedItem && (
+        <SendEmailModal 
+          item={selectedItem} 
+          onClose={closeModal} 
+          onSend={handleSendEmail} 
+        />
+      )}
+      {selectedAction === "end" && selectedItem && (
+        <EndTrialModal 
+          item={selectedItem} 
+          onClose={closeModal} 
+          onConfirm={handleEndTrial} 
+        />
+      )}
     </main>
   );
 }

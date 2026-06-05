@@ -2,10 +2,42 @@ import React, { useState, useEffect } from "react";
 import { Download, RefreshCcw } from "lucide-react";
 import { paymentsData } from "./billing";
 import { Pagination } from "../common/Pagination";
+import { ViewReceiptModal } from "./ViewReceiptModal";
+import { RefundModal } from "./RefundModal";
 
 export function PaymentsTable({ searchQuery = "" }: { searchQuery?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
+
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedAction, setSelectedAction] = useState<"receipt" | "refund" | null>(null);
+
+  const openModal = (item: any, action: "receipt" | "refund") => {
+    setSelectedItem(item);
+    setSelectedAction(action);
+  };
+
+  const closeModal = () => {
+    setSelectedItem(null);
+    setSelectedAction(null);
+  };
+
+  const handleDownloadReceipt = (item: any) => {
+    const content = `RECEIPT\n\nTransaction ID: ${item.transactionId}\nAgency: ${item.agencyName}\nAmount Paid: ${item.amount}\nDate: ${item.date}\nPayment Method: ${item.method}\nStatus: ${item.status}`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Receipt_${item.transactionId}.txt`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleConfirmRefund = () => {
+    console.log("Refund issued for", selectedItem?.transactionId);
+  };
 
   const filteredPayments = paymentsData.filter((pay) =>
     pay.agencyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -59,11 +91,19 @@ export function PaymentsTable({ searchQuery = "" }: { searchQuery?: string }) {
                 </span>
               </td>
               <td className="px-6 py-4 flex space-x-2 justify-center">
-                <button aria-label="Receipt" className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground">
+                <button
+                  onClick={() => openModal(item, "receipt")}
+                  aria-label="Receipt"
+                  className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground"
+                >
                   <Download className="w-5 h-5" />
                 </button>
                 {item.status === "Successful" && (
-                  <button aria-label="Refund" className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground">
+                  <button
+                    onClick={() => openModal(item, "refund")}
+                    aria-label="Refund"
+                    className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground"
+                  >
                     <RefreshCcw className="w-5 h-5" />
                   </button>
                 )}
@@ -81,6 +121,20 @@ export function PaymentsTable({ searchQuery = "" }: { searchQuery?: string }) {
         onPageChange={setCurrentPage}
         itemName="transactions"
       />
+      {selectedAction === "receipt" && selectedItem && (
+        <ViewReceiptModal
+          item={selectedItem}
+          onClose={closeModal}
+          onDownload={() => handleDownloadReceipt(selectedItem)}
+        />
+      )}
+      {selectedAction === "refund" && selectedItem && (
+        <RefundModal
+          item={selectedItem}
+          onClose={closeModal}
+          onConfirm={handleConfirmRefund}
+        />
+      )}
     </main>
   );
 }

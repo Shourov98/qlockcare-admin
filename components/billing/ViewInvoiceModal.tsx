@@ -1,0 +1,89 @@
+import React from "react";
+import { X, Download } from "lucide-react";
+
+interface ViewInvoiceModalProps {
+  item: any;
+  onClose: () => void;
+  onDownload: () => void;
+}
+
+export function ViewInvoiceModal({ item, onClose, onDownload }: ViewInvoiceModalProps) {
+  const getStatusClasses = (status: string) => {
+    switch (status) {
+      case "Paid": return "bg-green-100 text-green-700";
+      case "Pending": return "bg-yellow-100 text-yellow-700";
+      case "Overdue": return "bg-red-100 text-red-700";
+      default: return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-[16px] shadow-lg w-full max-w-md overflow-hidden flex flex-col">
+        <div className="flex items-center justify-between p-6 border-b border-border bg-muted/10">
+          <h3 className="text-xl font-bold text-foreground">
+            Invoice Details
+          </h3>
+          <button 
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-muted/20 transition-colors text-muted-foreground hover:text-foreground"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="p-6 space-y-4 flex-1 overflow-y-auto">
+          <div className="flex justify-between items-start">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-muted-foreground">Invoice Number</label>
+              <p className="text-foreground font-bold text-lg">{item.invoiceNumber}</p>
+            </div>
+            <span className={`text-[12px] font-semibold px-3 py-1 rounded-[100px] inline-block ${getStatusClasses(item.status)}`}>
+              {item.status}
+            </span>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-muted-foreground">Billed To</label>
+            <p className="text-foreground font-medium">{item.agencyName}</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border mt-4">
+            <div className="space-y-1.5 pt-2">
+              <label className="text-sm font-medium text-muted-foreground">Issue Date</label>
+              <p className="text-foreground font-medium">{item.issueDate}</p>
+            </div>
+            <div className="space-y-1.5 pt-2">
+              <label className="text-sm font-medium text-muted-foreground">Due Date</label>
+              <p className="text-foreground font-medium">{item.dueDate}</p>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-border mt-4 flex justify-between items-center">
+            <label className="text-sm font-medium text-muted-foreground">Total Amount</label>
+            <p className="text-foreground font-bold text-2xl">{item.amount}</p>
+          </div>
+        </div>
+
+        <div className="p-6 border-t border-border bg-muted/10 flex justify-end gap-3">
+          <button 
+            onClick={onClose}
+            className="px-4 py-2 rounded-[8px] border border-border text-sm font-medium hover:bg-muted/50 transition-colors text-foreground"
+          >
+            Close
+          </button>
+          <button 
+            onClick={() => {
+              onDownload();
+              onClose();
+            }}
+            className="px-4 py-2 rounded-[8px] bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Download PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

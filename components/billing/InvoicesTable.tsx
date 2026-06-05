@@ -2,10 +2,37 @@ import React, { useState, useEffect } from "react";
 import { Download, Eye } from "lucide-react";
 import { invoicesData } from "./billing";
 import { Pagination } from "../common/Pagination";
+import { ViewInvoiceModal } from "./ViewInvoiceModal";
 
 export function InvoicesTable({ searchQuery = "" }: { searchQuery?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
+
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
+  const openModal = (item: any) => {
+    setSelectedItem(item);
+    setIsViewModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedItem(null);
+    setIsViewModalOpen(false);
+  };
+
+  const handleDownload = (item: any) => {
+    const content = `INVOICE\n\nNumber: ${item.invoiceNumber}\nAgency: ${item.agencyName}\nAmount: ${item.amount}\nIssue Date: ${item.issueDate}\nDue Date: ${item.dueDate}\nStatus: ${item.status}`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${item.invoiceNumber}.txt`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const filteredInvoices = invoicesData.filter((inv) =>
     inv.agencyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -59,10 +86,18 @@ export function InvoicesTable({ searchQuery = "" }: { searchQuery?: string }) {
                 </span>
               </td>
               <td className="px-6 py-4 flex space-x-2 justify-center">
-                <button aria-label="View" className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground">
+                <button
+                  onClick={() => openModal(item)}
+                  aria-label="View"
+                  className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground"
+                >
                   <Eye className="w-5 h-5" />
                 </button>
-                <button aria-label="Download" className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground">
+                <button
+                  onClick={() => handleDownload(item)}
+                  aria-label="Download"
+                  className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground"
+                >
                   <Download className="w-5 h-5" />
                 </button>
               </td>
@@ -79,6 +114,14 @@ export function InvoicesTable({ searchQuery = "" }: { searchQuery?: string }) {
         onPageChange={setCurrentPage}
         itemName="invoices"
       />
+
+      {isViewModalOpen && selectedItem && (
+        <ViewInvoiceModal
+          item={selectedItem}
+          onClose={closeModal}
+          onDownload={() => handleDownload(selectedItem)}
+        />
+      )}
     </main>
   );
 }
