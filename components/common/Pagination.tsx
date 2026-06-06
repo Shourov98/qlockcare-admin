@@ -20,7 +20,7 @@ export function Pagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-white">
+    <div className="flex items-center justify-between px-6 py-4 bg-white">
       <div className="text-sm text-muted-foreground">
         Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} {itemName}
       </div>
@@ -37,11 +37,10 @@ export function Pagination({
             <button
               key={page}
               onClick={() => onPageChange(page)}
-              className={`w-8 h-8 flex items-center justify-center rounded-md text-sm transition-colors ${
-                currentPage === page
+              className={`w-8 h-8 flex items-center justify-center rounded-md text-sm transition-colors ${currentPage === page
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-muted/50"
-              }`}
+                }`}
             >
               {page}
             </button>
