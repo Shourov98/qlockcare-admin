@@ -53,7 +53,7 @@ export function TrialsTable({ searchQuery = "" }: { searchQuery?: string }) {
   };
 
   return (
-    <main>
+    <main className="bg-card rounded-[12px] shadow-[0px_1px_4px_rgba(0,0,0,0.08)] overflow-hidden">
       <table className="w-full text-left text-[14px] text-foreground">
         <thead className="bg-[#066a5f] text-[12px] tracking-[0.05em] font-semibold text-white uppercase border-b border-border">
           <tr>
@@ -82,17 +82,17 @@ export function TrialsTable({ searchQuery = "" }: { searchQuery?: string }) {
                 </span>
               </td>
               <td className="px-6 py-4 flex space-x-2 justify-center">
-                <button 
+                <button
                   onClick={() => openModal(item, "email")}
-                  aria-label="Send Email" 
+                  aria-label="Send Email"
                   className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground"
                 >
                   <Mail className="w-5 h-5" />
                 </button>
                 {item.status === "Active" && (
-                  <button 
+                  <button
                     onClick={() => openModal(item, "end")}
-                    aria-label="End Trial" 
+                    aria-label="End Trial"
                     className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground0"
                   >
                     <ShieldAlert className="w-5 h-5" />
@@ -115,17 +115,17 @@ export function TrialsTable({ searchQuery = "" }: { searchQuery?: string }) {
 
       {/* Modals */}
       {selectedAction === "email" && selectedItem && (
-        <SendEmailModal 
-          item={selectedItem} 
-          onClose={closeModal} 
-          onSend={handleSendEmail} 
+        <SendEmailModal
+          item={selectedItem}
+          onClose={closeModal}
+          onSend={handleSendEmail}
         />
       )}
       {selectedAction === "end" && selectedItem && (
-        <EndTrialModal 
-          item={selectedItem} 
-          onClose={closeModal} 
-          onConfirm={handleEndTrial} 
+        <EndTrialModal
+          item={selectedItem}
+          onClose={closeModal}
+          onConfirm={handleEndTrial}
         />
       )}
     </main>

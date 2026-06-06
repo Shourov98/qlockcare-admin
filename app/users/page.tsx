@@ -11,8 +11,13 @@ export default function ClientsPage() {
   return (
     <main className="p-6 space-y-6">
       <ClientsSummaryCards />
-      <div className="overflow-x-auto bg-card rounded-[12px] shadow-[0px_1px_4px_rgba(0,0,0,0.08)] overflow-hidden">
-        <div className="flex items-center justify-end gap-2 p-2">
+      <div className="overflow-x-auto overflow-hidden">
+        <div className="flex items-center justify-between gap-2 p-2">
+          <div className="py-5 flex justify-between items-center">
+            <h2 className="text-[24px] font-bold text-foreground">
+              Clients List
+            </h2>
+          </div>
           <div className="relative flex items-center gap-2">
             <Search className="absolute left-3 text-muted-foreground w-5 h-5" />
             <input

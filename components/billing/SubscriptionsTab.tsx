@@ -14,17 +14,17 @@ export function SubscriptionsTab({ searchQuery, setSearchQuery }: SubscriptionsT
 
   const handleExport = () => {
     const headers = ["Agency Name", "Agency Email", "Plan", "Status", "Amount", "Billing Cycle", "Next Payment"];
-    
+
     const dataToExport = subscriptionsData.filter(sub => {
       const matchesSearch = sub.agencyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            sub.agencyEmail.toLowerCase().includes(searchQuery.toLowerCase());
+        sub.agencyEmail.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === "All Status" || sub.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
 
     const csvContent = [
       headers.join(","),
-      ...dataToExport.map(row => 
+      ...dataToExport.map(row =>
         `"${row.agencyName}","${row.agencyEmail}","${row.plan}","${row.status}","${row.amount}","${row.billingCycle}","${row.nextPayment}"`
       )
     ].join("\n");
@@ -43,9 +43,9 @@ export function SubscriptionsTab({ searchQuery, setSearchQuery }: SubscriptionsT
   return (
     <div className="space-y-8">
       <BillingSummaryCards />
-      <div className="overflow-x-auto bg-card rounded-[12px] shadow-[0px_1px_4px_rgba(0,0,0,0.08)] overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-foreground">Agency Subscriptions</h2>
+      <div className="overflow-x-auto overflow-hidden">
+        <div className="flex items-center justify-between py-5">
+          <h2 className="text-[24px] font-bold text-foreground">Agency Subscriptions</h2>
           <div className="flex items-center gap-3">
             <button
               onClick={handleExport}

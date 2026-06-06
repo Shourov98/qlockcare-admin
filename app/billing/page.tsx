@@ -16,13 +16,6 @@ export default function BillingPage() {
   return (
     <main className="p-6 space-y-6">
       <div className="space-y-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Billing & Subscriptions</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Manage agency subscriptions, invoices, payments, and billing information
-          </p>
-        </div>
-
         <div className="border-b border-border">
           <nav className="flex space-x-8">
             {tabs.map((tab) => (

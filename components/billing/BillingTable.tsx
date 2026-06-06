@@ -50,9 +50,9 @@ export function BillingTable({ searchQuery = "", statusFilter = "All Status" }: 
   };
 
   return (
-    <main>
-      <table className="w-full text-left text-[14px] text-foreground">
-        <thead className="bg-[#066a5f] text-[12px] tracking-[0.05em] font-semibold text-white uppercase border-b border-border">
+    <main className="">
+      <table className="bg-card w-full text-left text-[14px] overflow-hidden text-foreground rounded-[12px]">
+        <thead className="bg-[#066a5f] text-[12px] tracking-[0.05em] font-semibold text-white uppercase border-b border-border rounded-[12px]">
           <tr>
             <th className="px-6 py-4">Agency</th>
             <th className="px-6 py-4">Plan</th>

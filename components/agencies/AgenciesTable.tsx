@@ -50,7 +50,7 @@ export function AgenciesTable({ searchQuery = "" }: { searchQuery?: string }) {
 
   return (
     <main>
-      <table className="w-full text-left text-[14px] text-foreground">
+      <table className="bg-card w-full text-left text-[14px] text-foreground rounded-[12px] overflow-hidden">
         <thead className="bg-[#066a5f] text-[12px] tracking-[0.05em] font-semibold text-white uppercase border-b border-border">
           <tr>
             <th className="px-6 py-4">Agency</th>

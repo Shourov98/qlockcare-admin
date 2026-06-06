@@ -38,8 +38,8 @@ export function RecentActivities() {
   ];
 
   return (
-    <div className="">
-      <div className="p-5 flex justify-between items-center">
+    <>
+      <div className="flex justify-between items-center">
         <h2 className="text-[24px] font-bold text-foreground">
           Recent Activities
         </h2>
@@ -101,6 +101,6 @@ export function RecentActivities() {
           </tbody>
         </table>
       </div>
-    </div>
+    </>
   );
 }

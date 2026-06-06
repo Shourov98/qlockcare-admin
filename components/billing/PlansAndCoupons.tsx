@@ -34,7 +34,7 @@ export function PlansAndCoupons() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-foreground tracking-tight">Subscription Plans</h2>
-          <button 
+          <button
             onClick={() => openPlanModal()}
             className="flex items-center gap-2 bg-[#066a5f] text-white px-4 py-2 rounded-[8px] text-sm font-medium hover:bg-[#05584f] transition-colors"
           >
@@ -74,7 +74,7 @@ export function PlansAndCoupons() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-foreground tracking-tight">Active Coupons</h2>
-          <button 
+          <button
             onClick={() => openCouponModal()}
             className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-[8px] text-sm font-medium transition-colors"
           >
@@ -118,6 +118,7 @@ export function PlansAndCoupons() {
                   </tr>
                 ))}
               </tbody>
+
             </table>
           </div>
         </div>
@@ -125,24 +126,24 @@ export function PlansAndCoupons() {
 
       {/* Modals */}
       {isPlanModalOpen && (
-        <PlanModal 
-          item={selectedPlan} 
-          onClose={() => setIsPlanModalOpen(false)} 
-          onSave={() => console.log("Plan saved")} 
+        <PlanModal
+          item={selectedPlan}
+          onClose={() => setIsPlanModalOpen(false)}
+          onSave={() => console.log("Plan saved")}
         />
       )}
       {isCouponModalOpen && (
-        <CouponModal 
-          item={selectedCoupon} 
-          onClose={() => setIsCouponModalOpen(false)} 
-          onSave={() => console.log("Coupon saved")} 
+        <CouponModal
+          item={selectedCoupon}
+          onClose={() => setIsCouponModalOpen(false)}
+          onSave={() => console.log("Coupon saved")}
         />
       )}
       {isDeleteCouponModalOpen && selectedCoupon && (
-        <DeleteCouponModal 
-          item={selectedCoupon} 
-          onClose={() => setIsDeleteCouponModalOpen(false)} 
-          onConfirm={() => console.log("Coupon deleted")} 
+        <DeleteCouponModal
+          item={selectedCoupon}
+          onClose={() => setIsDeleteCouponModalOpen(false)}
+          onConfirm={() => console.log("Coupon deleted")}
         />
       )}
     </div>

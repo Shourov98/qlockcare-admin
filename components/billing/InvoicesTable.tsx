@@ -6,7 +6,7 @@ import { ViewInvoiceModal } from "./ViewInvoiceModal";
 
 export function InvoicesTable({ searchQuery = "" }: { searchQuery?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 5;
 
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -59,7 +59,7 @@ export function InvoicesTable({ searchQuery = "" }: { searchQuery?: string }) {
   };
 
   return (
-    <main>
+    <main className="bg-card rounded-[12px] shadow-[0px_1px_4px_rgba(0,0,0,0.08)] overflow-hidden">
       <table className="w-full text-left text-[14px] text-foreground">
         <thead className="bg-[#066a5f] text-[12px] tracking-[0.05em] font-semibold text-white uppercase border-b border-border">
           <tr>
