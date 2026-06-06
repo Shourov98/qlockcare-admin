@@ -10,20 +10,20 @@ export function ExpiringLicensesTable() {
     const [docsPage, setDocsPage] = useState(1);
     const [searchQuery, setSearchQuery] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [statusFilter, setStatusFilter] = useState('All Statuses');
 
-    const filteredDocs = expiringLicenses.filter(doc =>
-        doc.agency.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doc.docName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doc.docType.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
+    const filteredDocs = expiringLicenses.filter(doc => {
+        const matchesSearch = doc.agency.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            doc.docName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            doc.docType.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'All Statuses' || doc.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
     const itemsPerPage = 5;
     const totalItems = filteredDocs.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-
     const startIndex = (docsPage - 1) * itemsPerPage;
     const paginatedDocs = filteredDocs.slice(startIndex, startIndex + itemsPerPage);
-
     const handleExport = () => {
         const headers = ["ID", "Agency", "Document Type", "Document Name", "Expiry Date", "Days Until", "Status"];
         const csvContent = [
@@ -51,6 +51,19 @@ export function ExpiringLicensesTable() {
                     <h3 className="text-[24px] font-bold text-foreground">Expiring Licenses & Documents</h3>
                 </div>
                 <div className="flex flex-wrap items-center justify-end gap-2 p-2">
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => {
+                            setStatusFilter(e.target.value);
+                            setDocsPage(1);
+                        }}
+                        className="px-3 py-1.5 bg-card border border-border rounded-[12px] text-sm text-foreground shadow-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    >
+                        <option>All Statuses</option>
+                        <option>Critical</option>
+                        <option>Warning</option>
+                        <option>Upcoming</option>
+                    </select>
                     <div className="relative flex items-center gap-2">
                         <Search className="absolute left-3 text-muted-foreground w-4 h-4" />
                         <input
@@ -110,8 +123,8 @@ export function ExpiringLicensesTable() {
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3 text-sm font-medium">
-                                        <button className="text-primary hover:text-primary/80 transition-colors">Renew</button>
-                                        <button className="text-muted-foreground hover:text-foreground transition-colors">View</button>
+                                        <button className="text-primary font-semibold transition-colors">Renew</button>
+                                        <button className="text-primary font-semibold transition-colors">View</button>
                                     </div>
                                 </td>
                             </tr>
