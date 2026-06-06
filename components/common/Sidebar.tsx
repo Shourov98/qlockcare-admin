@@ -25,6 +25,7 @@ export function Sidebar() {
     { title: "Dashboard", icon: LayoutDashboard, href: "/" },
     { title: "Agencies", icon: Building2, href: "/agencies" },
     { title: "Clients", icon: Users, href: "/users" },
+    { title: "Admins", icon: Zap, href: "/admins" },
     { title: "Billing & Subscriptions", icon: CreditCard, href: "/billing" },
     { title: "Compliance & Risk", icon: ShieldCheck, href: "/compliance" },
     { title: "Documents & Licenses", icon: FileText, href: "/documents" },
