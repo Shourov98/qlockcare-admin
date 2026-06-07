@@ -31,9 +31,9 @@ export function Sidebar() {
     { title: "Documents & Licenses", icon: FileText, href: "/documents" },
     // { title: "Integrations & Health", icon: Plug, href: "/integrations" },
     { title: "Support / Tickets", icon: Headphones, href: "/support" },
-    { title: "Audit Logs", icon: ClipboardList, href: "/audit-logs" },
-    { title: "Templates & Forms", icon: LayoutTemplate, href: "/templates" },
-    { title: "Reports & Exports", icon: FileBarChart, href: "/reports" },
+    // { title: "Audit Logs", icon: ClipboardList, href: "/audit-logs" },
+    // { title: "Templates & Forms", icon: LayoutTemplate, href: "/templates" },
+    // { title: "Reports & Exports", icon: FileBarChart, href: "/reports" },
     { title: "Global Settings", icon: Settings, href: "/settings" },
   ];
 
