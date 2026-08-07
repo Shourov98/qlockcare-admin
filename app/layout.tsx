@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
-import { Sidebar } from "@/components/common/Sidebar";
-import { Header } from "@/components/common/Header";
+import { AdminShell } from "@/components/common/AdminShell";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -22,13 +23,19 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background font-sans">
-        <div className="flex h-screen overflow-hidden">
-          <Sidebar />
-          <div className="flex-1 flex flex-col min-w-0">
-            <Header />
-            <main className="flex-1 overflow-y-auto">{children}</main>
-          </div>
-        </div>
+        <AuthProvider>
+          <Suspense
+            fallback={
+              <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="rounded-lg border border-border bg-card px-5 py-4 text-sm text-muted-foreground shadow-sm">
+                  Loading dashboard...
+                </div>
+              </div>
+            }
+          >
+            <AdminShell>{children}</AdminShell>
+          </Suspense>
+        </AuthProvider>
       </body>
     </html>
   );

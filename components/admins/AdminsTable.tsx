@@ -1,6 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Eye, Edit, Trash2, UserPlus } from "lucide-react";
-import { admins, Admin } from "./admins";
+import {
+  Admin,
+  AdminCreateInput,
+  AdminUpdateInput,
+  createAdmin,
+  deleteAdmin,
+  listAdmins,
+  updateAdmin,
+} from "./admins";
 
 import { Pagination } from "../common/Pagination";
 import { AdminViewModal } from "./AdminViewModal";
@@ -8,12 +16,47 @@ import { AdminEditModal } from "./AdminEditModal";
 import { AdminDeleteModal } from "./AdminDeleteModal";
 import { AdminAddModal } from "./AdminAddModal";
 
+const ITEMS_PER_PAGE = 10;
+
 export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
+  const [adminRows, setAdminRows] = useState<Admin[]>([]);
   const [selectedAdmin, setSelectedAdmin] = useState<Admin | null>(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const loadAdmins = useCallback(async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const result = await listAdmins({
+        page: currentPage,
+        pageSize: ITEMS_PER_PAGE,
+        search: searchQuery,
+      });
+      setAdminRows(result.data);
+      setTotalItems(result.pagination.total);
+      setTotalPages(Math.max(result.pagination.total_pages, 1));
+    } catch {
+      setError("Unable to load admins.");
+      setAdminRows([]);
+      setTotalItems(0);
+      setTotalPages(1);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, searchQuery]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadAdmins();
+  }, [loadAdmins]);
 
   const openView = (admin: Admin) => {
     setSelectedAdmin(admin);
@@ -38,23 +81,31 @@ export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
     setSelectedAdmin(null);
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const handleAdd = async (input: AdminCreateInput) => {
+    await createAdmin(input);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      await loadAdmins();
+    }
+  };
 
-  const filteredAdmins = admins.filter((admin) =>
-    admin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    admin.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleEdit = async (adminId: string, input: AdminUpdateInput) => {
+    const updated = await updateAdmin(adminId, input);
+    setAdminRows((rows) => rows.map((admin) => (admin.id === adminId ? updated : admin)));
+    setSelectedAdmin(updated);
+  };
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
-
-  const totalPages = Math.ceil(filteredAdmins.length / ITEMS_PER_PAGE);
-  const currentData = filteredAdmins.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const handleDelete = async (adminId: string) => {
+    await deleteAdmin(adminId);
+    const nextTotal = Math.max(totalItems - 1, 0);
+    const nextTotalPages = Math.max(Math.ceil(nextTotal / ITEMS_PER_PAGE), 1);
+    if (currentPage > nextTotalPages) {
+      setCurrentPage(nextTotalPages);
+      return;
+    }
+    await loadAdmins();
+  };
 
   return (
     <main>
@@ -68,6 +119,11 @@ export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
         </button>
       </div>
       <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+        {error ? (
+          <div className="px-6 py-4 border-b border-border bg-red-50 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-[14px] text-foreground">
             <thead className="bg-[#066a5f] text-[12px] tracking-[0.05em] font-semibold text-white uppercase border-b border-border">
@@ -80,11 +136,24 @@ export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
               </tr>
             </thead>
             <tbody>
-              {currentData.map((admin, idx) => (
+              {isLoading ? (
+                <tr>
+                  <td className="px-6 py-8 text-center text-muted-foreground" colSpan={5}>
+                    Loading admins...
+                  </td>
+                </tr>
+              ) : adminRows.length === 0 ? (
+                <tr>
+                  <td className="px-6 py-8 text-center text-muted-foreground" colSpan={5}>
+                    No admins found.
+                  </td>
+                </tr>
+              ) : (
+                adminRows.map((admin) => (
                 <tr key={admin.id} className="border-b border-border hover:bg-muted/20 transition-colors last:border-0">
                   <td className="px-6 py-4 font-medium">{admin.name}</td>
                   <td className="px-6 py-4">{admin.email}</td>
-                  <td className="px-6 py-4">{admin.phone}</td>
+                  <td className="px-6 py-4">{admin.phone || "-"}</td>
                   <td className="px-6 py-4 text-muted-foreground">{admin.createdAt}</td>
                   <td className="px-6 py-4 flex space-x-2 justify-center">
                     <button aria-label="View" onClick={() => openView(admin)} className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground">
@@ -98,7 +167,8 @@ export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
                     </button>
                   </td>
                 </tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -106,7 +176,7 @@ export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={filteredAdmins.length}
+          totalItems={totalItems}
           itemsPerPage={ITEMS_PER_PAGE}
           onPageChange={setCurrentPage}
           itemName="admins"
@@ -114,9 +184,21 @@ export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
       </div>
 
       <AdminViewModal isOpen={viewOpen} admin={selectedAdmin} onClose={closeModals} />
-      <AdminEditModal isOpen={editOpen} admin={selectedAdmin} onClose={closeModals} />
-      <AdminDeleteModal isOpen={deleteOpen} admin={selectedAdmin} onClose={closeModals} />
-      <AdminAddModal isOpen={addOpen} onClose={closeModals} />
+      <AdminEditModal
+        key={`edit-${selectedAdmin?.id || "none"}`}
+        isOpen={editOpen}
+        admin={selectedAdmin}
+        onClose={closeModals}
+        onEdit={handleEdit}
+      />
+      <AdminDeleteModal
+        key={`delete-${selectedAdmin?.id || "none"}`}
+        isOpen={deleteOpen}
+        admin={selectedAdmin}
+        onClose={closeModals}
+        onDelete={handleDelete}
+      />
+      <AdminAddModal isOpen={addOpen} onClose={closeModals} onAdd={handleAdd} />
     </main>
   );
 }

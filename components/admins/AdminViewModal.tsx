@@ -25,7 +25,15 @@ export function AdminViewModal({ isOpen, admin, onClose }: AdminViewModalProps) 
           </div>
           <div>
             <dt className="font-medium">Phone</dt>
-            <dd>{admin.phone}</dd>
+            <dd>{admin.phone || "-"}</dd>
+          </div>
+          <div>
+            <dt className="font-medium">Status</dt>
+            <dd>{admin.status}</dd>
+          </div>
+          <div>
+            <dt className="font-medium">Email Verified</dt>
+            <dd>{admin.emailVerified ? "Yes" : "No"}</dd>
           </div>
           <div>
             <dt className="font-medium">Created At</dt>
