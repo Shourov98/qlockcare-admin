@@ -1,6 +1,7 @@
 import React from "react";
 import { Search } from "lucide-react";
 import { TrialsTable } from "./TrialsTable";
+import { PendingBackendBanner } from "./PendingBackendBanner";
 
 interface TrialsTabProps {
   searchQuery: string;
@@ -10,6 +11,10 @@ interface TrialsTabProps {
 export function TrialsTab({ searchQuery, setSearchQuery }: TrialsTabProps) {
   return (
     <div className="space-y-4">
+      <PendingBackendBanner
+        tabName="Trials & Demos"
+        endpoint="GET /admin/billing/trials?status=TRIAL (filters /agencies by status=TRIAL with trial_started_at / trial_ends_at)"
+      />
       <div className="overflow-x-auto overflow-hidden">
         <div className="flex items-center justify-between py-5">
           <h2 className="text-[24px] font-bold text-foreground">Trial & Demo Accounts</h2>

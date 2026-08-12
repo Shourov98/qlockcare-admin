@@ -4,8 +4,21 @@ import { plansData, couponsData } from "./billing";
 import { PlanModal } from "./PlanModal";
 import { CouponModal } from "./CouponModal";
 import { DeleteCouponModal } from "./DeleteCouponModal";
+import { PendingBackendBanner } from "./PendingBackendBanner";
 
 export function PlansAndCoupons() {
+  return (
+    <>
+      <PendingBackendBanner
+        tabName="Plans & Coupons"
+        endpoint="GET/POST/PATCH/DELETE /admin/billing/plans + /admin/billing/coupons"
+      />
+      <PlansAndCouponsBody />
+    </>
+  );
+}
+
+function PlansAndCouponsBody() {
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
 

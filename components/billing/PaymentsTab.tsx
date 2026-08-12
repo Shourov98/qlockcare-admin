@@ -1,6 +1,7 @@
 import React from "react";
 import { Search } from "lucide-react";
 import { PaymentsTable } from "./PaymentsTable";
+import { PendingBackendBanner } from "./PendingBackendBanner";
 
 interface PaymentsTabProps {
   searchQuery: string;
@@ -10,6 +11,10 @@ interface PaymentsTabProps {
 export function PaymentsTab({ searchQuery, setSearchQuery }: PaymentsTabProps) {
   return (
     <div className="space-y-4">
+      <PendingBackendBanner
+        tabName="Payments"
+        endpoint="GET /admin/billing/payments + GET /admin/billing/refunds"
+      />
       <div className="overflow-x-auto rounded-[12px] overflow-hidden">
         <div className="flex items-center justify-between py-5">
           <h2 className="text-[24px] font-bold text-foreground">Payment Transactions</h2>
