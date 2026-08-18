@@ -1,53 +1,210 @@
-import { CalendarDays, FileWarning, ShieldAlert } from "lucide-react";
+import { apiRequest } from "@/lib/api";
 
-export const initialCardData = [
-  {
-    title: "Total Agencies",
-    value: "847",
-    subtext: "+12%",
-    status: "success",
-    icon: CalendarDays,
-  },
-  {
-    title: "Active Agencies",
-    value: "67",
-    subtext: "+12%",
-    status: "warning",
-    icon: ShieldAlert,
-  },
-  {
-    title: "Total Staff",
-    value: "142",
-    subtext: "$+12%",
-    status: "purple",
-    icon: FileWarning,
+// Mirrors `qlockcare_backend/src/shared/domain/enums.py`.
+// `subscriptionPlan` is shown as a badge in the table, `status`
+// drives the ACTIVE/TRIAL/SUSPENDED/CHURNED lifecycle.
+export type AgencyStatus =
+  | "ACTIVE"
+  | "TRIAL"
+  | "SUSPENDED"
+  | "CHURNED";
+
+export type AgencySubscriptionPlan =
+  | "BASIC"
+  | "PROFESSIONAL"
+  | "ENTERPRISE";
+
+type PlatformAgency = {
+  id: string;
+  name: string;
+  status: AgencyStatus;
+  timezone: string;
+  subscription_plan: AgencySubscriptionPlan;
+  subscription_price_cents: number;
+  subscription_billing_cycle: string;
+  trial_started_at: string | null;
+  trial_ends_at: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  cancel_at_period_end: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+// Frontend projection — derived fields like `subscription_price_cents`
+// → formatted string so the table doesn't have to think about currency.
+export type Agency = {
+  id: string;
+  name: string;
+  status: AgencyStatus;
+  timezone: string;
+  subscriptionPlan: AgencySubscriptionPlan;
+  subscriptionPriceCents: number;
+  subscriptionPriceDisplay: string;
+  billingCycle: string;
+  isTrialing: boolean;
+  trialEndsAt: string | null;
+  hasStripeSubscription: boolean;
+  cancelAtPeriodEnd: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AgencyListResult = {
+  data: Agency[];
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+  };
+};
+
+// `POST /agencies` requires a bound `AGENCY_ADMIN`. Two branches:
+//   1. new user (email + full_name required, password optional)
+//   2. promote existing user (existing_user_id set)
+// The form only sends the new-user branch — promoting happens from
+// the agency's admin list page (deferred).
+export type AgencyCreateInput = {
+  name: string;
+  timezone?: string;
+  subscriptionPlan: AgencySubscriptionPlan;
+  startTrial?: boolean;
+  trialDays?: number;
+  initialProgramCodes?: string[];
+  admin: {
+    email: string;
+    fullName: string;
+    phone?: string;
+    password?: string; // omitted = INVITED, set = ACTIVE
+  };
+};
+
+export type AgencyUpdateInput = {
+  name?: string;
+  timezone?: string;
+  status?: AgencyStatus;
+  subscriptionPlan?: AgencySubscriptionPlan;
+  trialEndsAt?: string | null;
+  settings?: Record<string, unknown>;
+};
+
+function formatPrice(cents: number): string {
+  const dollars = cents / 100;
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: dollars % 1 === 0 ? 0 : 2,
+  }).format(dollars);
+}
+
+function formatDate(value: string | null): string {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toISOString().split("T")[0];
+}
+
+function mapAgency(raw: PlatformAgency): Agency {
+  return {
+    id: raw.id,
+    name: raw.name,
+    status: raw.status,
+    timezone: raw.timezone,
+    subscriptionPlan: raw.subscription_plan,
+    subscriptionPriceCents: raw.subscription_price_cents,
+    subscriptionPriceDisplay: formatPrice(raw.subscription_price_cents),
+    billingCycle: raw.subscription_billing_cycle,
+    isTrialing: raw.status === "TRIAL",
+    trialEndsAt: raw.trial_ends_at,
+    hasStripeSubscription: !!raw.stripe_subscription_id,
+    cancelAtPeriodEnd: raw.cancel_at_period_end,
+    createdAt: formatDate(raw.created_at),
+    updatedAt: formatDate(raw.updated_at),
+  };
+}
+
+export async function listAgencies(params: {
+  page: number;
+  pageSize: number;
+  search?: string;
+  statusFilter?: AgencyStatus;
+}): Promise<AgencyListResult> {
+  const query = new URLSearchParams({
+    page: String(params.page),
+    page_size: String(params.pageSize),
+  });
+  if (params.search?.trim()) {
+    query.set("search", params.search.trim());
   }
-];
+  if (params.statusFilter) {
+    query.set("status_filter", params.statusFilter);
+  }
 
-export const agencies = [
-  { name: "QLOCKCARE", status: "Active", employeeCount: 150, services: "PCA,245D,ARMHS,Counseling", createdAt: "2023-01-15" },
-  { name: "HealthCare Plus", status: "Inactive", employeeCount: 245, services: "PCA", createdAt: "2022-09-03" },
-  { name: "Premier Care", status: "Active", employeeCount: 98, services: "PCA,245D,ARMHS", createdAt: "2023-05-22" },
-  { name: "CareFirst Agency", status: "Active", employeeCount: 187, services: "ARMHS,Counseling", createdAt: "2024-02-08" },
-  { name: "Wellness Solutions", status: "Active", employeeCount: 76, services: "245D,ARMHS,Counseling", createdAt: "2023-11-12" },
-  { name: "MediAssist", status: "Inactive", employeeCount: 321, services: "PCA,245D,ARMHS,Counseling", createdAt: "2021-07-19" },
-  { name: "HealthBridge", status: "Active", employeeCount: 112, services: "PCA,245D,ARMHS", createdAt: "2022-03-05" },
-  { name: "CareLink", status: "Pending", employeeCount: 10, services: "PCA,245D,ARMHS,Counseling", createdAt: "2024-01-20" },
-  { name: "Synergy HomeCare", status: "Active", employeeCount: 67, services: "PCA,245D", createdAt: "2023-08-30" },
-  { name: "Gentle Hands Care", status: "Pending", employeeCount: 15, services: "PCA,245D,ARMHS,Counseling", createdAt: "2024-02-15" },
-  { name: "BrightStar Care", status: "Inactive", employeeCount: 210, services: "PCA", createdAt: "2022-04-10" },
-  { name: "HomeWell Health", status: "Active", employeeCount: 89, services: "PCA,245D,ARMHS", createdAt: "2023-03-25" },
-  { name: "Allure Home Care", status: "Active", employeeCount: 43, services: "PCA,245D,ARMHS,Counseling", createdAt: "2024-01-05" },
-  { name: "Prestige Care Services", status: "Pending", employeeCount: 22, services: "PCA,245D", createdAt: "2024-02-20" },
-  { name: "Quality Homecare", status: "Active", employeeCount: 58, services: "PCA", createdAt: "2022-11-18" },
-  { name: "Guardian Health", status: "Active", employeeCount: 134, services: "PCA,245D,ARMHS,Counseling", createdAt: "2023-07-11" },
-  { name: "Comfort Keepers", status: "Inactive", employeeCount: 88, services: "PCA,245D", createdAt: "2021-12-05" },
-  { name: "Compassionate Care", status: "Active", employeeCount: 205, services: "PCA,ARMHS", createdAt: "2024-03-10" },
-  { name: "Lumina HomeCare", status: "Pending", employeeCount: 45, services: "PCA,245D,Counseling", createdAt: "2024-05-01" },
-  { name: "TrueCare Services", status: "Active", employeeCount: 160, services: "PCA,245D,ARMHS,Counseling", createdAt: "2022-10-25" },
-  { name: "Evergreen Care", status: "Active", employeeCount: 92, services: "245D,ARMHS", createdAt: "2023-06-18" },
-  { name: "Harmony Health", status: "Inactive", employeeCount: 310, services: "PCA,Counseling", createdAt: "2021-09-14" },
-  { name: "Oasis Services", status: "Active", employeeCount: 175, services: "PCA,245D,ARMHS,Counseling", createdAt: "2023-11-30" },
-  { name: "Apex Care Group", status: "Pending", employeeCount: 30, services: "PCA,245D,ARMHS", createdAt: "2024-04-12" },
-  { name: "Pioneer Health", status: "Active", employeeCount: 142, services: "PCA,Counseling", createdAt: "2022-08-21" },
-];
+  type Envelope = {
+    data: PlatformAgency[];
+    pagination: AgencyListResult["pagination"];
+  };
+  const result = await apiRequest<Envelope>(`/agencies?${query}`);
+  return {
+    data: result.data.map(mapAgency),
+    pagination: result.pagination,
+  };
+}
+
+export async function getAgency(id: string): Promise<Agency> {
+  const raw = await apiRequest<PlatformAgency>(`/agencies/${id}`);
+  return mapAgency(raw);
+}
+
+export async function createAgency(input: AgencyCreateInput): Promise<Agency> {
+  const body = {
+    name: input.name,
+    timezone: input.timezone || "America/Chicago",
+    subscription_plan: input.subscriptionPlan,
+    start_trial: input.startTrial || false,
+    trial_days: input.trialDays || 14,
+    initial_program_codes: input.initialProgramCodes || [],
+    admin: {
+      email: input.admin.email,
+      full_name: input.admin.fullName,
+      phone: input.admin.phone || null,
+      // Omit password entirely (not null) when INVITED — the backend
+      // treats absent as "send invitation email".
+      ...(input.admin.password ? { password: input.admin.password } : {}),
+    },
+  };
+
+  const raw = await apiRequest<PlatformAgency>("/agencies", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  return mapAgency(raw);
+}
+
+export async function updateAgency(
+  id: string,
+  input: AgencyUpdateInput,
+): Promise<Agency> {
+  const body: Record<string, unknown> = {};
+  if (input.name !== undefined) body.name = input.name;
+  if (input.timezone !== undefined) body.timezone = input.timezone;
+  if (input.status !== undefined) body.status = input.status;
+  if (input.subscriptionPlan !== undefined) {
+    body.subscription_plan = input.subscriptionPlan;
+  }
+  if (input.trialEndsAt !== undefined) {
+    body.trial_ends_at = input.trialEndsAt;
+  }
+  if (input.settings !== undefined) body.settings = input.settings;
+
+  const raw = await apiRequest<PlatformAgency>(`/agencies/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+  return mapAgency(raw);
+}
+
+export async function softDeleteAgency(id: string): Promise<void> {
+  await apiRequest<void>(`/agencies/${id}`, { method: "DELETE" });
+}
