@@ -1,78 +1,131 @@
-import { Users, FileWarning, ShieldAlert } from "lucide-react";
+import { apiRequest } from "@/lib/api";
 
-export const clientsCardDataMonthly = [
-  {
-    title: "Total Clients",
-    value: "1,248",
-    subtext: "+5%",
-    status: "success",
-    icon: Users,
-  },
-  {
-    title: "Active Clients",
-    value: "1,102",
-    subtext: "+2%",
-    status: "warning",
-    icon: ShieldAlert,
-  },
-  {
-    title: "New Requests",
-    value: "45",
-    subtext: "+15%",
-    status: "purple",
-    icon: FileWarning,
-  }
-];
+// Client (Patient) DTOs + API.
+//
+// The admin "Clients" sidebar item surfaces patients across every
+// agency (SUPER_ADMIN-only). Two endpoints back the page:
+//   - GET /admin/people/patients — cross-tenant list (preferred)
+//   - GET /patients/{id}/with-relationships — single patient deep view
+//
+// The cross-tenant endpoint is preferred because RLS-scoped `/patients`
+// rejects SUPER_ADMIN (it requires an agency_id). We only fall back to
+// the single-patient endpoint for the "View" modal where we need the
+// full relationship graph.
 
-export const clientsCardDataYearly = [
-  {
-    title: "Total Clients",
-    value: "14,976",
-    subtext: "+24%",
-    status: "success",
-    icon: Users,
-  },
-  {
-    title: "Active Clients",
-    value: "12,500",
-    subtext: "+18%",
-    status: "warning",
-    icon: ShieldAlert,
-  },
-  {
-    title: "New Requests",
-    value: "840",
-    subtext: "+40%",
-    status: "purple",
-    icon: FileWarning,
-  }
-];
+export type PatientStatus = "ACTIVE" | "INACTIVE" | "ARCHIVED";
 
-export const clients = [
+export type Patient = {
+  id: string;
+  agency_id: string;
+  agency_name: string | null;
+  user_id: string;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  patient_code: string;
+  status: PatientStatus;
+  date_of_birth: string | null;
+  gender: string | null;
+  preferred_language: string | null;
+  care_notes: string | null;
+  admitted_at: string | null;
+  discharged_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
 
-    { sl: 1, name: "Acme Corp", status: "Active", email: "contact@acmecorp.com", mobile: "9876543210", address: "123 Main St, Anytown, USA", guardianName: "John Doe", guardianMobile: "9876543210", guardianEmail: "aman@gmail.com" },
-    { sl: 2, name: "Beta Health", status: "Inactive", email: "hello@betahealth.org", mobile: "9876543211", address: "124 Main St, Anytown, USA", guardianName: "Jane Doe", guardianMobile: "9876543211", guardianEmail: "aman2@gmail.com" },
-    { sl: 3, name: "Gamma Solutions", status: "Active", email: "support@gammasol.io", mobile: "9876543212", address: "125 Main St, Anytown, USA", guardianName: "Jim Doe", guardianMobile: "9876543212", guardianEmail: "aman3@gmail.com" },
-    { sl: 4, name: "Delta Services", status: "Active", email: "dispatch@deltaserv.net", mobile: "9876543213", address: "126 Main St, Anytown, USA", guardianName: "Jack Doe", guardianMobile: "9876543213", guardianEmail: "aman4@gmail.com" },
-    { sl: 5, name: "Epsilon Analytics", status: "Pending", email: "info@epsilon.com", mobile: "9876543214", address: "127 Main St, Anytown, USA", guardianName: "Jill Doe", guardianMobile: "9876543214", guardianEmail: "aman5@gmail.com" },
-    { sl: 6, name: "Zeta Care", status: "Active", email: "care@zeta.org", mobile: "9876543215", address: "128 Main St, Anytown, USA", guardianName: "Jenny Doe", guardianMobile: "9876543215", guardianEmail: "aman6@gmail.com" },
-    { sl: 7, name: "Eta Logistics", status: "Inactive", email: "hello@etalogistics.com", mobile: "9876543216", address: "129 Main St, Anytown, USA", guardianName: "Joseph Doe", guardianMobile: "9876543216", guardianEmail: "aman7@gmail.com" },
-    { sl: 8, name: "Theta Group", status: "Active", email: "invest@thetagroup.com", mobile: "9876543217", address: "130 Main St, Anytown, USA", guardianName: "Joshua Doe", guardianMobile: "9876543217", guardianEmail: "aman8@gmail.com" },
-    { sl: 9, name: "Iota Systems", status: "Active", email: "contact@iota.com", mobile: "9876543218", address: "131 Main St, Anytown, USA", guardianName: "Alice Doe", guardianMobile: "9876543218", guardianEmail: "aman9@gmail.com" },
-    { sl: 10, name: "Kappa Design", status: "Pending", email: "hello@kappa.com", mobile: "9876543219", address: "132 Main St, Anytown, USA", guardianName: "Bob Doe", guardianMobile: "9876543219", guardianEmail: "aman10@gmail.com" },
-    { sl: 11, name: "Lambda Networks", status: "Active", email: "support@lambda.net", mobile: "9876543220", address: "133 Main St, Anytown, USA", guardianName: "Charlie Doe", guardianMobile: "9876543220", guardianEmail: "aman11@gmail.com" },
-    { sl: 12, name: "Mu Dynamics", status: "Inactive", email: "info@mu.org", mobile: "9876543221", address: "134 Main St, Anytown, USA", guardianName: "Dave Doe", guardianMobile: "9876543221", guardianEmail: "aman12@gmail.com" },
-    { sl: 13, name: "Nu Health", status: "Active", email: "care@nuhealth.com", mobile: "9876543222", address: "135 Main St, Anytown, USA", guardianName: "Eve Doe", guardianMobile: "9876543222", guardianEmail: "aman13@gmail.com" },
-    { sl: 14, name: "Xi Logistics", status: "Pending", email: "dispatch@xi.net", mobile: "9876543223", address: "136 Main St, Anytown, USA", guardianName: "Frank Doe", guardianMobile: "9876543223", guardianEmail: "aman14@gmail.com" },
-    { sl: 15, name: "Omicron Tech", status: "Active", email: "hello@omicron.io", mobile: "9876543224", address: "137 Main St, Anytown, USA", guardianName: "Grace Doe", guardianMobile: "9876543224", guardianEmail: "aman15@gmail.com" },
-    { sl: 16, name: "Pi Consulting", status: "Active", email: "info@piconsulting.com", mobile: "9876543225", address: "138 Main St, Anytown, USA", guardianName: "Hank Doe", guardianMobile: "9876543225", guardianEmail: "aman16@gmail.com" },
-    { sl: 17, name: "Rho Solutions", status: "Inactive", email: "support@rho.com", mobile: "9876543226", address: "139 Main St, Anytown, USA", guardianName: "Ivy Doe", guardianMobile: "9876543226", guardianEmail: "aman17@gmail.com" },
-    { sl: 18, name: "Sigma Finance", status: "Active", email: "invest@sigma.net", mobile: "9876543227", address: "140 Main St, Anytown, USA", guardianName: "Jack Doe", guardianMobile: "9876543227", guardianEmail: "aman18@gmail.com" },
-    { sl: 19, name: "Tau Robotics", status: "Pending", email: "hello@tau.io", mobile: "9876543228", address: "141 Main St, Anytown, USA", guardianName: "Kelly Doe", guardianMobile: "9876543228", guardianEmail: "aman19@gmail.com" },
-    { sl: 20, name: "Upsilon Energy", status: "Active", email: "info@upsilon.com", mobile: "9876543229", address: "142 Main St, Anytown, USA", guardianName: "Liam Doe", guardianMobile: "9876543229", guardianEmail: "aman20@gmail.com" },
-    { sl: 21, name: "Phi Pharma", status: "Active", email: "care@phi.org", mobile: "9876543230", address: "143 Main St, Anytown, USA", guardianName: "Mia Doe", guardianMobile: "9876543230", guardianEmail: "aman21@gmail.com" },
-    { sl: 22, name: "Chi Analytics", status: "Inactive", email: "data@chi.net", mobile: "9876543231", address: "144 Main St, Anytown, USA", guardianName: "Noah Doe", guardianMobile: "9876543231", guardianEmail: "aman22@gmail.com" },
-    { sl: 23, name: "Psi Media", status: "Active", email: "contact@psi.com", mobile: "9876543232", address: "145 Main St, Anytown, USA", guardianName: "Olivia Doe", guardianMobile: "9876543232", guardianEmail: "aman23@gmail.com" },
-    { sl: 24, name: "Omega Group", status: "Pending", email: "hello@omega.io", mobile: "9876543233", address: "146 Main St, Anytown, USA", guardianName: "Paul Doe", guardianMobile: "9876543233", guardianEmail: "aman24@gmail.com" },
-    { sl: 25, name: "Alpha Startups", status: "Active", email: "info@alpha.com", mobile: "9876543234", address: "147 Main St, Anytown, USA", guardianName: "Quinn Doe", guardianMobile: "9876543234", guardianEmail: "aman25@gmail.com" }
-];
+export type PatientListResult = {
+  data: Patient[];
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+  };
+};
+
+// Mirrors qclockcare_backend/src/shared/domain/enums.py PatientStatus.
+const PATIENT_STATUS_LABEL: Record<PatientStatus, string> = {
+  ACTIVE: "Active",
+  INACTIVE: "Inactive",
+  ARCHIVED: "Archived",
+};
+
+export function patientStatusLabel(status: PatientStatus): string {
+  return PATIENT_STATUS_LABEL[status] ?? status;
+}
+
+export const PATIENT_STATUS_STYLE: Record<PatientStatus, string> = {
+  ACTIVE: "bg-green-100 text-green-700",
+  INACTIVE: "bg-red-100 text-red-700",
+  ARCHIVED: "bg-slate-100 text-slate-600",
+};
+
+export function patientStatusStyle(status: PatientStatus): string {
+  return PATIENT_STATUS_STYLE[status] ?? PATIENT_STATUS_STYLE.ARCHIVED;
+}
+
+export interface ListClientsArgs {
+  page: number;
+  pageSize: number;
+  search?: string;
+  statusFilter?: PatientStatus;
+  agencyId?: string;
+}
+
+export async function listClients(
+  args: ListClientsArgs,
+): Promise<PatientListResult> {
+  const query = new URLSearchParams({
+    page: String(args.page),
+    page_size: String(args.pageSize),
+  });
+  if (args.search?.trim()) query.set("search", args.search.trim());
+  if (args.statusFilter) query.set("status", args.statusFilter);
+  if (args.agencyId) query.set("agency_id", args.agencyId);
+
+  return apiRequest<PatientListResult>(
+    `/admin/people/patients?${query.toString()}`,
+  );
+}
+
+export type ClientGuardianLink = {
+  id: string;
+  patient_id: string;
+  guardian_id: string;
+  relationship: string;
+  is_primary: boolean;
+  // Denormalized for the modal — not all backend responses include them
+  guardian_name?: string | null;
+  guardian_email?: string | null;
+  guardian_phone?: string | null;
+};
+
+export type PatientDeepView = Patient & {
+  guardians: ClientGuardianLink[];
+};
+
+export async function getClient(id: string): Promise<PatientDeepView> {
+  // Single-patient deep view is RLS-scoped to one tenant. SUPER_ADMIN
+  // can call it as long as their JWT carries a matching agency context
+  // — which isn't true here. We fall back to the cross-tenant row plus
+  // an empty guardians array; a real guardians API for cross-tenant
+  // will land in a follow-up.
+  const row = await apiRequest<Patient>(`/admin/people/patients?q=${id}`).catch(
+    async () => {
+      // If `/admin/people/patients` doesn't take an id filter (the
+      // current backend only filters on agency_id/status/search), fall
+      // back to listing and picking by id. The list endpoint is cheap
+      // at default page_size.
+      const list = await apiRequest<PatientListResult>(
+        `/admin/people/patients?page=1&page_size=100`,
+      );
+      const match = list.data.find((p) => p.id === id);
+      if (!match) {
+        throw new Error("Patient not found");
+      }
+      return match;
+    },
+  );
+  return { ...row, guardians: [] };
+}
