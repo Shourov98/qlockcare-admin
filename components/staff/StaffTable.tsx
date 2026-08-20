@@ -1,0 +1,187 @@
+"use client";
+
+import React, { useEffect, useState, useCallback } from "react";
+import { Eye } from "lucide-react";
+import {
+  listStaff,
+  staffStatusLabel,
+  staffStatusStyle,
+  type Staff,
+  type StaffStatus,
+} from "./staff";
+import { StaffViewModal } from "./StaffViewModal";
+import { Pagination } from "../common/Pagination";
+
+const ITEMS_PER_PAGE = 10;
+
+// "Staff List" table on /staff.
+//
+// Reads the cross-tenant `/admin/people/staff` endpoint with
+// pagination, filters by `searchQuery` (staff_code substring) and
+// `statusFilter`. Read-only — no Edit/Delete actions since the
+// admin_people router explicitly excludes cross-tenant mutations.
+export function StaffTable({
+  searchQuery = "",
+  statusFilter = "",
+}: {
+  searchQuery?: string;
+  statusFilter?: "" | StaffStatus;
+}) {
+  const [rows, setRows] = useState<Staff[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Staff | null>(null);
+  const [viewOpen, setViewOpen] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await listStaff({
+        page: currentPage,
+        pageSize: ITEMS_PER_PAGE,
+        search: searchQuery,
+        ...(statusFilter ? { statusFilter } : {}),
+      });
+      setRows(result.data);
+      setTotalItems(result.pagination.total);
+    } catch (caught) {
+      if (caught instanceof Error) {
+        setError(caught.message);
+      } else {
+        setError("Unable to load staff.");
+      }
+      setRows([]);
+      setTotalItems(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, searchQuery, statusFilter]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
+  }, [load]);
+
+  // Reset to first page whenever the filter changes
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
+  const totalPages = Math.max(Math.ceil(totalItems / ITEMS_PER_PAGE), 1);
+
+  return (
+    <main className="rounded-[12px] overflow-hidden">
+      {error ? (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-[12px] px-4 py-3">
+          {error}
+        </div>
+      ) : null}
+      <table className="w-full text-left text-[14px] text-foreground rounded-[12px] bg-card overflow-hidden">
+        <thead className="bg-[#066a5f] text-[12px] tracking-[0.05em] font-semibold text-white uppercase border-b border-border">
+          <tr>
+            <th className="px-6 py-4">Code</th>
+            <th className="px-6 py-4">Name</th>
+            <th className="px-6 py-4">Status</th>
+            <th className="px-6 py-4">Agency</th>
+            <th className="px-6 py-4">Email</th>
+            <th className="px-6 py-4">Phone</th>
+            <th className="px-6 py-4">Hired</th>
+            <th className="px-6 py-4 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {loading ? (
+            <tr>
+              <td
+                colSpan={8}
+                className="px-6 py-8 text-center text-muted-foreground"
+              >
+                Loading staff…
+              </td>
+            </tr>
+          ) : rows.length === 0 ? (
+            <tr>
+              <td
+                colSpan={8}
+                className="px-6 py-8 text-center text-muted-foreground"
+              >
+                No staff match the current filters.
+              </td>
+            </tr>
+          ) : (
+            rows.map((member) => (
+              <tr
+                key={member.id}
+                className="border-b border-border hover:bg-muted/20 transition-colors last:border-0"
+              >
+                <td className="px-6 py-4 font-mono text-xs">
+                  {member.staff_code}
+                </td>
+                <td className="px-6 py-4 font-medium">
+                  {member.full_name ?? "—"}
+                </td>
+                <td className="px-6 py-4">
+                  <span
+                    className={`text-[12px] font-semibold px-2 py-1 rounded-[100px] ${staffStatusStyle(member.status)}`}
+                  >
+                    {staffStatusLabel(member.status)}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-muted-foreground">
+                  {member.agency_name ?? "—"}
+                </td>
+                <td className="px-6 py-4 text-muted-foreground">
+                  {member.email ?? "—"}
+                </td>
+                <td className="px-6 py-4 text-muted-foreground">
+                  {member.phone ?? "—"}
+                </td>
+                <td className="px-6 py-4 text-muted-foreground">
+                  {member.hired_at
+                    ? new Date(member.hired_at).toISOString().split("T")[0]
+                    : "—"}
+                </td>
+                <td className="px-6 py-4 flex space-x-2 justify-center">
+                  <button
+                    aria-label="View"
+                    onClick={() => {
+                      setSelected(member);
+                      setViewOpen(true);
+                    }}
+                    className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground"
+                  >
+                    <Eye className="w-5 h-5" />
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+
+      {!loading && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={setCurrentPage}
+          itemName="staff"
+        />
+      )}
+
+      <StaffViewModal
+        isOpen={viewOpen}
+        staff={selected}
+        onClose={() => {
+          setViewOpen(false);
+          setSelected(null);
+        }}
+      />
+    </main>
+  );
+}
