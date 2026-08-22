@@ -6,6 +6,10 @@ export type CurrentUser = {
   email_verified: boolean;
   agency_id: string | null;
   role: string | null;
+  // Scopes are non-empty only for PLATFORM_ADMIN. SUPER_ADMIN has
+  // implicit full access (bypassed by the backend) — its scopes
+  // list is empty. Empty list also for non-admin roles.
+  scopes: string[];
 };
 
 export type TokenPair = {

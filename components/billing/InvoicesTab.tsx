@@ -1,35 +1,31 @@
 import React from "react";
-import { Search } from "lucide-react";
-import { InvoicesTable } from "./InvoicesTable";
 import { PendingBackendBanner } from "./PendingBackendBanner";
+import { MockedEmptyState } from "./MockedEmptyState";
 
-interface InvoicesTabProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-}
-
-export function InvoicesTab({ searchQuery, setSearchQuery }: InvoicesTabProps) {
+/**
+ * The Invoices table used to render fabricated rows from
+ * `components/billing/billing.ts`. Until `GET /admin/billing/invoices`
+ * exists, we render an honest empty state so a developer reading the
+ * UI is never misled into thinking the data is real.
+ */
+export function InvoicesTab() {
   return (
     <div className="space-y-4">
       <PendingBackendBanner
         tabName="Invoices"
         endpoint="GET /admin/billing/invoices (paginated, filtered by agency_id / status / date range)"
       />
-      <div className="overflow-x-auto rounded-[12px] overflow-hidden">
+      <div className="overflow-hidden">
         <div className="flex items-center justify-between py-5">
-          <h2 className="text-[24px] font-bold text-foreground">Invoices History</h2>
-          <div className="relative flex items-center">
-            <Search className="absolute left-3 text-muted-foreground w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search invoices..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="border border-border bg-muted/20 rounded-[8px] pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-64"
-            />
-          </div>
+          <h2 className="text-[24px] font-bold text-foreground">
+            Invoices History
+          </h2>
         </div>
-        <InvoicesTable searchQuery={searchQuery} />
+        <MockedEmptyState
+          feature="Invoices"
+          endpoint="GET /admin/billing/invoices"
+          hint="A paginated listing of every invoice across all agencies, filterable by status and date range. Until this endpoint exists, no invoices can be shown."
+        />
       </div>
     </div>
   );

@@ -42,9 +42,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const currentUser = await getMe();
-      if (currentUser.role !== "SUPER_ADMIN") {
+      // Accept both SUPER_ADMIN (full cross-tenant) and PLATFORM_ADMIN
+      // (scoped cross-tenant via admin_scopes). The Sidebar uses the
+      // current user's role + scopes to decide which items to show.
+      if (
+        currentUser.role !== "SUPER_ADMIN" &&
+        currentUser.role !== "PLATFORM_ADMIN"
+      ) {
         clearTokens();
-        throw new ApiError(403, "Only super admin accounts can access this dashboard.");
+        throw new ApiError(
+          403,
+          "Only super admin or platform admin accounts can access this dashboard.",
+        );
       }
       setUser(currentUser);
     } catch (error) {
@@ -65,9 +74,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const data = await loginRequest(email, password);
-    if (data.user.role !== "SUPER_ADMIN") {
+    if (
+      data.user.role !== "SUPER_ADMIN" &&
+      data.user.role !== "PLATFORM_ADMIN"
+    ) {
       clearTokens();
-      throw new ApiError(403, "Only super admin accounts can access this dashboard.");
+      throw new ApiError(
+        403,
+        "Only super admin or platform admin accounts can access this dashboard.",
+      );
     }
     setUser(data.user);
   }, []);
