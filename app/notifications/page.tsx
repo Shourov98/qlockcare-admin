@@ -17,7 +17,6 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
   Notification,
-  NotificationType,
   relativeTime,
   TYPE_VISUAL,
 } from "@/components/notifications/notifications";
@@ -87,7 +86,9 @@ export default function NotificationsPage() {
       await markAllNotificationsRead();
       setItems((current) =>
         current.map((n) =>
-          n.status === "unread" ? { ...n, status: "read", read_at: new Date().toISOString() } : n,
+          n.read_at === null
+            ? { ...n, status: "READ", read_at: new Date().toISOString() }
+            : n,
         ),
       );
       setUnreadCount(0);
@@ -101,7 +102,7 @@ export default function NotificationsPage() {
   };
 
   const filtered = filter === "unread"
-    ? items.filter((n) => n.status === "unread")
+    ? items.filter((n) => n.read_at === null)
     : items;
 
   return (
@@ -183,10 +184,9 @@ export default function NotificationsPage() {
           ) : (
             filtered.map((notification) => {
               const visual =
-                TYPE_VISUAL[notification.type as NotificationType] ||
-                TYPE_VISUAL.custom;
+                TYPE_VISUAL[notification.type] || TYPE_VISUAL.custom;
               const Icon = ICONS[visual.icon];
-              const unread = notification.status === "unread";
+              const unread = notification.read_at === null;
               return (
                 <div
                   key={notification.id}

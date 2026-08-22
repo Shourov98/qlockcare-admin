@@ -1,6 +1,8 @@
 import { apiRequest } from "@/lib/api";
 
-// Mirrors qclockcare_backend/src/modules/notifications/schemas.py
+// Mirrors qclockcare_backend/src/shared/domain/enums.py NotificationType
+// (UPPERCASE enum values match the backend; kept snake_case for readability
+// since that's how the dispatcher code refers to them internally).
 export type NotificationType =
   | "visit_assigned"
   | "visit_completed"
@@ -19,10 +21,27 @@ export type NotificationType =
   | "system"
   | "custom";
 
-export type NotificationStatus = "unread" | "read" | "archived";
+// Mirrors qclockcare_backend NotificationChannel — UPPERCASE enum values.
+export type NotificationChannel = "IN_APP" | "EMAIL" | "SMS" | "PUSH";
+
+// Mirrors qclockcare_backend NotificationStatus — UPPERCASE enum values.
+// Note: there is no UNREAD status. An unread notification has
+// `read_at === null`; the dispatcher starts every row as PENDING then
+// promotes to SENT → DELIVERED (or FAILED/BOUNCED) once the channel
+// confirms. Read flips to READ and stamps `read_at`.
+export type NotificationStatus =
+  | "PENDING"
+  | "SENT"
+  | "DELIVERED"
+  | "FAILED"
+  | "BOUNCED"
+  | "READ";
 
 export type Notification = {
   id: string;
+  // Cross-tenant admins (SUPER_ADMIN, PLATFORM_ADMIN) have agency_id=NULL
+  // on rows they receive — the dispatcher copied ctx.agency_id at insert
+  // time and that value is NULL for cross-tenant users.
   agency_id: string | null;
   recipient_user_id: string;
   type: NotificationType;
@@ -48,7 +67,7 @@ export type NotificationBadge = {
 export type NotificationPreference = {
   user_id: string;
   type: NotificationType;
-  channel: "in_app" | "email" | "sms" | "push";
+  channel: NotificationChannel;
   opted_in: boolean;
   updated_at: string;
 };
@@ -61,7 +80,7 @@ export interface ListNotificationsArgs {
 
 export interface UpdateNotificationPreferenceArgs {
   type: NotificationType;
-  channel: "in_app" | "email" | "sms" | "push";
+  channel: NotificationChannel;
   opted_in: boolean;
 }
 
@@ -86,41 +105,45 @@ export async function getNotification(id: string): Promise<Notification> {
   return apiRequest<Notification>(`/notifications/${id}`);
 }
 
+// Backend exposes this as PATCH (idempotent — sets read_at regardless of
+// current state). Earlier code used POST which 405'd.
 export async function markNotificationRead(id: string): Promise<Notification> {
   return apiRequest<Notification>(`/notifications/${id}/read`, {
-    method: "POST",
-    body: JSON.stringify({}),
+    method: "PATCH",
   });
 }
 
+// Response shape from POST /notifications/read-all is `{ marked_count: int }`
+// (not `{ updated: int }`).
 export async function markAllNotificationsRead(): Promise<{
-  updated: number;
+  marked_count: number;
 }> {
-  return apiRequest<{ updated: number }>(
-    `/notifications/read-all`,
-    {
-      method: "POST",
-      body: JSON.stringify({}),
-    },
-  );
+  return apiRequest<{ marked_count: number }>(`/notifications/read-all`, {
+    method: "POST",
+  });
 }
 
-export async function listNotificationPreferences(): Promise<{
-  data: NotificationPreference[];
-}> {
-  return apiRequest<{ data: NotificationPreference[] }>(
-    `/notifications/preferences`,
-  );
+// GET /notifications/preferences returns a bare JSON array, NOT a wrapper
+// envelope. The previous helper unwrapped `{ data: [...] }` which silently
+// returned `[]` for everyone because the API never sends that wrapper.
+export async function listNotificationPreferences(): Promise<
+  NotificationPreference[]
+> {
+  return apiRequest<NotificationPreference[]>(`/notifications/preferences`);
 }
 
+// Backend URL is /notifications/preferences/{type}/{channel} — type and
+// channel go in the path, only `opted_in` in the body. The previous
+// helper POSTed to /notifications/preferences with type/channel in the
+// body which 405'd.
 export async function updateNotificationPreference(
   args: UpdateNotificationPreferenceArgs,
 ): Promise<NotificationPreference> {
   return apiRequest<NotificationPreference>(
-    `/notifications/preferences`,
+    `/notifications/preferences/${args.type}/${args.channel}`,
     {
       method: "PUT",
-      body: JSON.stringify(args),
+      body: JSON.stringify({ opted_in: args.opted_in }),
     },
   );
 }

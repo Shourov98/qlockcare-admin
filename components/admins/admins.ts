@@ -1,5 +1,6 @@
 import { apiRequest } from "@/lib/api";
 
+// Mirror qclockcare_backend/src/shared/domain/enums.py
 export type AdminStatus =
   | "INVITED"
   | "EMAIL_VERIFICATION_PENDING"
@@ -8,6 +9,10 @@ export type AdminStatus =
   | "LOCKED"
   | "ARCHIVED";
 
+// Mirror qclockcare_backend AdminScope enum (UPPERCASE)
+export type AdminScope = "AGENCIES" | "CLINICAL" | "SUPPORT";
+
+// Mirror backend's PlatformAdminResponse
 type PlatformAdmin = {
   id: string;
   email: string;
@@ -15,7 +20,8 @@ type PlatformAdmin = {
   phone: string | null;
   status: AdminStatus;
   email_verified: boolean;
-  role: "SUPER_ADMIN";
+  role: "SUPER_ADMIN" | "PLATFORM_ADMIN";
+  scopes: AdminScope[];
   created_at: string;
   updated_at: string;
 };
@@ -27,6 +33,8 @@ export type Admin = {
   phone: string;
   status: AdminStatus;
   emailVerified: boolean;
+  role: "SUPER_ADMIN" | "PLATFORM_ADMIN";
+  scopes: AdminScope[];
   createdAt: string;
   updatedAt: string;
 };
@@ -46,11 +54,12 @@ type PlatformAdminListResult = {
   pagination: AdminListResult["pagination"];
 };
 
+// New create shape: no password (invitation flow), scopes required.
 export type AdminCreateInput = {
   name: string;
   email: string;
   phone?: string;
-  password: string;
+  scopes: AdminScope[];
 };
 
 export type AdminUpdateInput = {
@@ -59,6 +68,7 @@ export type AdminUpdateInput = {
   phone?: string;
   status?: AdminStatus;
   password?: string;
+  scopes?: AdminScope[];
 };
 
 function formatDate(value: string): string {
@@ -75,6 +85,8 @@ function mapAdmin(admin: PlatformAdmin): Admin {
     phone: admin.phone || "",
     status: admin.status,
     emailVerified: admin.email_verified,
+    role: admin.role,
+    scopes: admin.scopes,
     createdAt: formatDate(admin.created_at),
     updatedAt: formatDate(admin.updated_at),
   };
@@ -107,19 +119,20 @@ export async function createAdmin(input: AdminCreateInput): Promise<Admin> {
       full_name: input.name,
       email: input.email,
       phone: input.phone || null,
-      password: input.password,
+      scopes: input.scopes,
     }),
   });
   return mapAdmin(result);
 }
 
 export async function updateAdmin(id: string, input: AdminUpdateInput): Promise<Admin> {
-  const body: Record<string, string | null> = {};
+  const body: Record<string, string | string[] | null> = {};
   if (input.name !== undefined) body.full_name = input.name;
   if (input.email !== undefined) body.email = input.email;
   if (input.phone !== undefined) body.phone = input.phone || null;
   if (input.status !== undefined) body.status = input.status;
   if (input.password) body.password = input.password;
+  if (input.scopes !== undefined) body.scopes = input.scopes;
 
   const result = await apiRequest<PlatformAdmin>(`/admin/admins/${id}`, {
     method: "PATCH",
@@ -133,3 +146,16 @@ export async function deleteAdmin(id: string): Promise<void> {
     method: "DELETE",
   });
 }
+
+// Display helpers — used by AdminViewModal / AdminEditModal chips.
+export const SCOPE_LABEL: Record<AdminScope, string> = {
+  AGENCIES: "Agencies",
+  CLINICAL: "Clinical",
+  SUPPORT: "Support",
+};
+
+export const SCOPE_DESCRIPTION: Record<AdminScope, string> = {
+  AGENCIES: "View and update agency status, plan, suspension across tenants.",
+  CLINICAL: "View clients and staff across tenants (read-only).",
+  SUPPORT: "View audit logs and notifications across tenants.",
+};

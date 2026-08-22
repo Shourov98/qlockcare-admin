@@ -131,6 +131,7 @@ export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
                 <th className="px-6 py-4">Name</th>
                 <th className="px-6 py-4">Email</th>
                 <th className="px-6 py-4">Phone</th>
+                <th className="px-6 py-4">Role / Scopes</th>
                 <th className="px-6 py-4">Created On</th>
                 <th className="px-6 py-4 text-center">Actions</th>
               </tr>
@@ -138,13 +139,13 @@ export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td className="px-6 py-8 text-center text-muted-foreground" colSpan={5}>
+                  <td className="px-6 py-8 text-center text-muted-foreground" colSpan={6}>
                     Loading admins...
                   </td>
                 </tr>
               ) : adminRows.length === 0 ? (
                 <tr>
-                  <td className="px-6 py-8 text-center text-muted-foreground" colSpan={5}>
+                  <td className="px-6 py-8 text-center text-muted-foreground" colSpan={6}>
                     No admins found.
                   </td>
                 </tr>
@@ -154,6 +155,34 @@ export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
                   <td className="px-6 py-4 font-medium">{admin.name}</td>
                   <td className="px-6 py-4">{admin.email}</td>
                   <td className="px-6 py-4">{admin.phone || "-"}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col gap-1">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold w-fit ${
+                        admin.role === "SUPER_ADMIN"
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}>
+                        {admin.role === "SUPER_ADMIN" ? "Super Admin" : "Platform Admin"}
+                      </span>
+                      {admin.role === "PLATFORM_ADMIN" && admin.scopes.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {admin.scopes.map((scope) => (
+                            <span
+                              key={scope}
+                              className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            >
+                              {scope}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                      {admin.role === "PLATFORM_ADMIN" && admin.scopes.length === 0 ? (
+                        <span className="text-xs text-muted-foreground italic">
+                          No scopes assigned
+                        </span>
+                      ) : null}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 text-muted-foreground">{admin.createdAt}</td>
                   <td className="px-6 py-4 flex space-x-2 justify-center">
                     <button aria-label="View" onClick={() => openView(admin)} className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground">

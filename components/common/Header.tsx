@@ -89,10 +89,14 @@ export function Header() {
               />
               <div className="hidden sm:block">
                 <p className="text-[14px] font-semibold text-foreground leading-none">
-                  {user?.full_name || "Super Admin"}
+                  {user?.full_name || user?.email || "Admin"}
                 </p>
                 <p className="text-[12px] text-muted-foreground leading-none mt-1.5">
-                  Super Admin
+                  {user?.role === "SUPER_ADMIN"
+                    ? "Super Admin"
+                    : user?.role === "PLATFORM_ADMIN"
+                      ? "Platform Admin"
+                      : "Admin"}
                 </p>
               </div>
             </div>

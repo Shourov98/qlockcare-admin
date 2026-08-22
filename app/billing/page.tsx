@@ -38,17 +38,11 @@ export default function BillingPage() {
         <SubscriptionsTab searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       )}
 
-      {activeTab === "Invoices" && (
-        <InvoicesTab searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      )}
+      {activeTab === "Invoices" && <InvoicesTab />}
 
-      {activeTab === "Payments" && (
-        <PaymentsTab searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      )}
+      {activeTab === "Payments" && <PaymentsTab />}
 
-      {activeTab === "Trials & Demos" && (
-        <TrialsTab searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      )}
+      {activeTab === "Trials & Demos" && <TrialsTab />}
 
       {activeTab === "Plans & Coupons" && (
         <PlansAndCoupons />
