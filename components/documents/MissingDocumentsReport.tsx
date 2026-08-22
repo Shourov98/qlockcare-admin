@@ -1,64 +1,63 @@
 "use client";
 
-import React, { useState } from 'react';
-import { AlertTriangle, FileText, Search, Plus } from 'lucide-react';
-import { missingDocuments } from './data';
+import React, { useEffect, useState } from 'react';
+import { FileText, Search, Plus, Loader2 } from 'lucide-react';
 import { Pagination } from '@/components/common/Pagination';
 import { MissingDocRequestModal } from './MissingDocRequestModal';
 import { MissingDocViewModal } from './MissingDocViewModal';
 import { AddMissingDocumentModal } from './AddMissingDocumentModal';
+import {
+    AgencyDocument,
+    DOCUMENT_STATUS_LABEL,
+    documentStatusColor,
+    listMissingDocuments,
+} from '../compliance/compliance';
 
 export function MissingDocumentsReport() {
+    const [docs, setDocs] = useState<AgencyDocument[]>([]);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [docsPage, setDocsPage] = useState(1);
     const [isRequestModalOpen, setRequestModalOpen] = useState(false);
     const [isViewModalOpen, setViewModalOpen] = useState(false);
     const [isAddModalOpen, setAddModalOpen] = useState(false);
-    const [selectedDoc, setSelectedDoc] = useState<any>(null);
-
-    const filteredDocs = missingDocuments.filter(doc =>
-        doc.agency.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doc.missingList.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
+    const [selectedDoc, setSelectedDoc] = useState<AgencyDocument | null>(null);
     const itemsPerPage = 5;
-    const totalItems = filteredDocs.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
 
-    const startIndex = (docsPage - 1) * itemsPerPage;
-    const paginatedDocs = filteredDocs.slice(startIndex, startIndex + itemsPerPage);
-
-    const getColorStyles = (color: string) => {
-        switch (color) {
-            case 'red':
-                return {
-                    container: 'bg-red-50/50 border-red-100',
-                    iconBg: 'bg-red-100 text-red-500',
-                    text: 'text-red-500',
-                    button: 'bg-red-600 hover:bg-red-700 text-white',
-                };
-            case 'yellow':
-                return {
-                    container: 'bg-yellow-50/50 border-yellow-100',
-                    iconBg: 'bg-yellow-100 text-yellow-600',
-                    text: 'text-yellow-600',
-                    button: 'bg-yellow-600 hover:bg-yellow-700 text-white',
-                };
-            case 'orange':
-                return {
-                    container: 'bg-orange-50/50 border-orange-100',
-                    iconBg: 'bg-orange-100 text-orange-500',
-                    text: 'text-orange-500',
-                    button: 'bg-orange-600 hover:bg-orange-700 text-white',
-                };
-            default:
-                return {
-                    container: 'bg-muted/50 border-border',
-                    iconBg: 'bg-muted text-muted-foreground',
-                    text: 'text-muted-foreground',
-                    button: 'bg-primary hover:bg-primary/90 text-primary-foreground',
-                };
+    const refresh = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const result = await listMissingDocuments({
+                page,
+                pageSize: itemsPerPage,
+                ...(searchQuery.trim() ? { search: searchQuery.trim() } : {}),
+            });
+            setDocs(result.data);
+            setTotalPages(result.pagination.total_pages);
+            setTotal(result.pagination.total);
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : 'Failed to load missing documents';
+            setError(msg);
+            setDocs([]);
+            setTotalPages(1);
+            setTotal(0);
+        } finally {
+            setLoading(false);
         }
+    };
+
+    useEffect(() => {
+        refresh();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page]);
+
+    const onSearchChange = (value: string) => {
+        setSearchQuery(value);
+        setPage(1);
     };
 
     return (
@@ -74,14 +73,11 @@ export function MissingDocumentsReport() {
                             type="text"
                             placeholder="Search"
                             value={searchQuery}
-                            onChange={(e) => {
-                                setSearchQuery(e.target.value);
-                                setDocsPage(1);
-                            }}
+                            onChange={(e) => onSearchChange(e.target.value)}
                             className="border border-border rounded-[12px] pl-9 pr-4 py-1.5 text-sm bg-card text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                         />
                     </div>
-                    <button 
+                    <button
                         onClick={() => setAddModalOpen(true)}
                         className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded-[12px] text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
                     >
@@ -90,44 +86,71 @@ export function MissingDocumentsReport() {
                 </div>
             </div>
 
+            {error && (
+                <div className="bg-destructive/10 border border-destructive/30 text-destructive rounded-lg p-3 mb-4 text-sm">
+                    {error}
+                </div>
+            )}
+
             <div className="overflow-x-auto bg-card border border-border rounded-[12px]">
                 <table className="w-full text-left text-[14px] text-foreground">
                     <thead className="bg-[#066a5f] text-[12px] tracking-[0.05em] font-semibold text-white uppercase border-b border-border">
                         <tr>
-                            <th className="px-6 py-4 font-medium">Agency</th>
-                            <th className="px-6 py-4 font-medium">Missing Documents</th>
-                            <th className="px-6 py-4 font-medium">Count</th>
+                            <th className="px-6 py-4 font-medium">Document</th>
+                            <th className="px-6 py-4 font-medium">Description</th>
+                            <th className="px-6 py-4 font-medium">Status</th>
+                            <th className="px-6 py-4 font-medium">Expires</th>
                             <th className="px-6 py-4 font-medium text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedDocs.map((doc) => {
-                            const styles = getColorStyles(doc.color);
+                        {loading && docs.length === 0 && (
+                            <tr>
+                                <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                                    <Loader2 className="w-5 h-5 animate-spin inline mr-2" />
+                                Loading…
+                                </td>
+                            </tr>
+                        )}
+                        {!loading && docs.length === 0 && (
+                            <tr>
+                                <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                                    No missing documents.
+                                </td>
+                            </tr>
+                        )}
+                        {docs.map((doc) => {
+                            const styles = documentStatusColor(doc.status);
                             return (
                                 <tr key={doc.id} className="border-b border-border hover:bg-muted/20 transition-colors last:border-0">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${styles.iconBg}`}>
+                                            <div className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${styles.bg}`}>
                                                 <FileText className="w-4 h-4" />
                                             </div>
-                                            <span className="font-medium text-foreground">{doc.agency}</span>
+                                            <span className="font-medium text-foreground">{doc.name}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-muted-foreground">{doc.missingList}</td>
+                                    <td className="px-6 py-4 text-muted-foreground">
+                                        {doc.description || '—'}
+                                    </td>
                                     <td className="px-6 py-4">
-                                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${styles.container} ${styles.text}`}>
-                                            {doc.missingCount} Missing
+                                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${styles.bg} ${styles.text}`}>
+                                            {DOCUMENT_STATUS_LABEL[doc.status]}
                                         </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-muted-foreground text-sm">
+                                        {doc.expiresAt || 'No expiry'}
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center justify-end gap-3 text-sm font-medium">
-                                            <button 
+                                            <button
                                                 onClick={() => { setSelectedDoc(doc); setRequestModalOpen(true); }}
                                                 className="text-primary cursor-pointer rounded-md px-2 py-1 text-sm font-semibold"
                                             >
                                                 Request
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => { setSelectedDoc(doc); setViewModalOpen(true); }}
                                                 className="text-primary cursor-pointer rounded-md px-2 py-1 text-sm font-semibold"
                                             >
@@ -143,29 +166,29 @@ export function MissingDocumentsReport() {
             </div>
 
             <Pagination
-                currentPage={docsPage}
+                currentPage={page}
                 totalPages={totalPages}
-                totalItems={totalItems}
+                totalItems={total}
                 itemsPerPage={itemsPerPage}
-                onPageChange={setDocsPage}
+                onPageChange={setPage}
                 itemName="documents"
             />
 
-            <MissingDocRequestModal 
-                isOpen={isRequestModalOpen} 
-                onClose={() => { setRequestModalOpen(false); setSelectedDoc(null); }} 
-                doc={selectedDoc} 
-            />
-            
-            <MissingDocViewModal 
-                isOpen={isViewModalOpen} 
-                onClose={() => { setViewModalOpen(false); setSelectedDoc(null); }} 
-                doc={selectedDoc} 
+            <MissingDocRequestModal
+                isOpen={isRequestModalOpen}
+                onClose={() => { setRequestModalOpen(false); setSelectedDoc(null); }}
+                doc={selectedDoc}
             />
 
-            <AddMissingDocumentModal 
-                isOpen={isAddModalOpen} 
-                onClose={() => setAddModalOpen(false)} 
+            <MissingDocViewModal
+                isOpen={isViewModalOpen}
+                onClose={() => { setViewModalOpen(false); setSelectedDoc(null); }}
+                doc={selectedDoc}
+            />
+
+            <AddMissingDocumentModal
+                isOpen={isAddModalOpen}
+                onClose={() => { setAddModalOpen(false); refresh(); }}
             />
         </>
     );
