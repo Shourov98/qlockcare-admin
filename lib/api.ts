@@ -2,6 +2,7 @@ export type CurrentUser = {
   id: string;
   email: string;
   full_name: string;
+  phone: string | null;
   status: string;
   email_verified: boolean;
   agency_id: string | null;

@@ -13,6 +13,11 @@ export const authApi = baseApi.injectEndpoints({
       transformResponse: (response: { user: CurrentUser }) => response.user,
       providesTags: ["Session"],
     }),
+    updateProfile: build.mutation<CurrentUser, { full_name?: string; phone?: string }>({
+      query: (body) => ({ url: "/auth/me", method: "PATCH", body }),
+      transformResponse: (response: { user: CurrentUser }) => response.user,
+      invalidatesTags: ["Session"],
+    }),
     logout: build.mutation<void, void>({
       query: () => ({ url: "/auth/logout", method: "POST", body: {} }),
       invalidatesTags: ["Session"],
@@ -20,4 +25,9 @@ export const authApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useLazyGetMeQuery, useLoginMutation, useLogoutMutation } = authApi;
+export const {
+  useLazyGetMeQuery,
+  useLoginMutation,
+  useLogoutMutation,
+  useUpdateProfileMutation,
+} = authApi;

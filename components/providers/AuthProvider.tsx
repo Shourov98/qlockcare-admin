@@ -15,7 +15,12 @@ import {
   saveTokens,
   type CurrentUser,
 } from "@/lib/api";
-import { useLazyGetMeQuery, useLoginMutation, useLogoutMutation } from "@/store/api/authApi";
+import {
+  useLazyGetMeQuery,
+  useLoginMutation,
+  useLogoutMutation,
+  useUpdateProfileMutation,
+} from "@/store/api/authApi";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { sessionCleared, sessionLoaded, sessionLoading } from "@/store/slices/sessionSlice";
 
@@ -25,6 +30,7 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   reloadUser: () => Promise<void>;
+  updateProfile: (input: { full_name?: string; phone?: string }) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -35,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [getMe] = useLazyGetMeQuery();
   const [loginRequest] = useLoginMutation();
   const [logoutRequest] = useLogoutMutation();
+  const [updateProfileRequest] = useUpdateProfileMutation();
 
   const assertDashboardRole = useCallback((currentUser: CurrentUser) => {
     if (
@@ -90,6 +97,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [dispatch, logoutRequest]);
 
+  const updateProfile = useCallback(async (input: { full_name?: string; phone?: string }) => {
+    const updatedUser = await updateProfileRequest(input).unwrap();
+    dispatch(sessionLoaded(updatedUser));
+  }, [dispatch, updateProfileRequest]);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -97,8 +109,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       login,
       logout,
       reloadUser: loadCurrentUser,
+      updateProfile,
     }),
-    [loadCurrentUser, login, logout, status, user],
+    [loadCurrentUser, login, logout, status, updateProfile, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

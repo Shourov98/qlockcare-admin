@@ -1,7 +1,7 @@
 "use client";
 
-import React from 'react';
-import { User, Mail, Shield, BadgeCheck, Loader2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { User, Mail, Shield, BadgeCheck, Loader2, Save } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 
 /**
@@ -12,11 +12,35 @@ import { useAuth } from '@/components/providers/AuthProvider';
  * and (for PLATFORM_ADMIN) `scopes`. There is no `first_name` /
  * `last_name` split, no organisation field, and no avatar upload —
  * so we render only what the backend actually returns. Editing your
- * own name/email/phone is a future feature (it needs a
- * `PATCH /auth/me` endpoint that doesn't exist yet).
+ * `PATCH /auth/me` supports edits to full name and phone. Email remains
+ * read-only because it is the account's login identity.
  */
 export function ProfileSettings() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, updateProfile } = useAuth();
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setFullName(user?.full_name ?? "");
+    setPhone(user?.phone ?? "");
+  }, [user?.full_name, user?.phone]);
+
+  const save = async () => {
+    setError(null);
+    setSaved(false);
+    setIsSaving(true);
+    try {
+      await updateProfile({ full_name: fullName.trim(), phone: phone.trim() || undefined });
+      setSaved(true);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not save profile changes.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -70,10 +94,17 @@ export function ProfileSettings() {
       <div className="p-6 border-b border-border flex justify-between items-center">
         <div>
           <h3 className="text-lg font-bold text-foreground">Profile Information</h3>
-          <p className="text-sm text-muted-foreground">
-            Your signed-in admin account. Editing isn&apos;t available yet.
-          </p>
+          <p className="text-sm text-muted-foreground">Update your name and phone number.</p>
         </div>
+        <button
+          type="button"
+          onClick={save}
+          disabled={isSaving || !fullName.trim()}
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          Save changes
+        </button>
       </div>
 
       <div className="p-6">
@@ -91,8 +122,32 @@ export function ProfileSettings() {
           </div>
 
           <div className="flex-1 space-y-4">
-            <Field icon={User} label="Full Name" value={user.full_name} />
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1" htmlFor="profile-full-name">
+                Full Name
+              </label>
+              <input
+                id="profile-full-name"
+                value={fullName}
+                onChange={(event) => setFullName(event.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground"
+              />
+            </div>
             <Field icon={Mail} label="Email Address" value={user.email} />
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1" htmlFor="profile-phone">
+                Phone Number
+              </label>
+              <input
+                id="profile-phone"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+                placeholder="Not set"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground"
+              />
+            </div>
+            {error ? <p className="text-sm text-destructive">{error}</p> : null}
+            {saved ? <p className="text-sm text-emerald-700">Profile changes saved.</p> : null}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field

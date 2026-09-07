@@ -111,21 +111,16 @@ export async function getClient(id: string): Promise<PatientDeepView> {
   // — which isn't true here. We fall back to the cross-tenant row plus
   // an empty guardians array; a real guardians API for cross-tenant
   // will land in a follow-up.
-  const row = await apiRequest<Patient>(`/admin/people/patients?q=${id}`).catch(
-    async () => {
-      // If `/admin/people/patients` doesn't take an id filter (the
-      // current backend only filters on agency_id/status/search), fall
-      // back to listing and picking by id. The list endpoint is cheap
-      // at default page_size.
-      const list = await apiRequest<PatientListResult>(
-        `/admin/people/patients?page=1&page_size=100`,
-      );
-      const match = list.data.find((p) => p.id === id);
-      if (!match) {
-        throw new Error("Patient not found");
-      }
-      return match;
-    },
+  // The platform endpoint intentionally exposes a summary list only;
+  // it has no `/{id}` detail route or id filter. Select the requested
+  // patient from the largest allowed page rather than treating the list
+  // envelope as a patient response.
+  const list = await apiRequest<PatientListResult>(
+    `/admin/people/patients?page=1&page_size=100`,
   );
+  const row = list.data.find((patient) => patient.id === id);
+  if (!row) {
+    throw new Error("Patient not found");
+  }
   return { ...row, guardians: [] };
 }
