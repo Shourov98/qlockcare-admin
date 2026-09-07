@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import "./globals.css";
 import { AdminShell } from "@/components/common/AdminShell";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { StoreProvider } from "@/components/providers/StoreProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,19 +24,21 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background font-sans">
-        <AuthProvider>
-          <Suspense
-            fallback={
-              <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="rounded-lg border border-border bg-card px-5 py-4 text-sm text-muted-foreground shadow-sm">
-                  Loading dashboard...
+        <StoreProvider>
+          <AuthProvider>
+            <Suspense
+              fallback={
+                <div className="min-h-screen bg-background flex items-center justify-center">
+                  <div className="rounded-lg border border-border bg-card px-5 py-4 text-sm text-muted-foreground shadow-sm">
+                    Loading dashboard...
+                  </div>
                 </div>
-              </div>
-            }
-          >
-            <AdminShell>{children}</AdminShell>
-          </Suspense>
-        </AuthProvider>
+              }
+            >
+              <AdminShell>{children}</AdminShell>
+            </Suspense>
+          </AuthProvider>
+        </StoreProvider>
       </body>
     </html>
   );

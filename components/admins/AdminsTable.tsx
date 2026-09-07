@@ -1,14 +1,16 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Eye, Edit, Trash2, UserPlus } from "lucide-react";
 import {
   Admin,
   AdminCreateInput,
   AdminUpdateInput,
-  createAdmin,
-  deleteAdmin,
-  listAdmins,
-  updateAdmin,
 } from "./admins";
+import {
+  useCreateAdminMutation,
+  useDeleteAdminMutation,
+  useListAdminsQuery,
+  useUpdateAdminMutation,
+} from "@/store/api/adminsApi";
 
 import { Pagination } from "../common/Pagination";
 import { AdminViewModal } from "./AdminViewModal";
@@ -19,44 +21,28 @@ import { AdminAddModal } from "./AdminAddModal";
 const ITEMS_PER_PAGE = 10;
 
 export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
-  const [adminRows, setAdminRows] = useState<Admin[]>([]);
   const [selectedAdmin, setSelectedAdmin] = useState<Admin | null>(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [totalItems, setTotalItems] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const { data, isLoading, error, refetch } = useListAdminsQuery({
+    page: currentPage,
+    pageSize: ITEMS_PER_PAGE,
+    search: searchQuery,
+  });
+  const [createAdmin] = useCreateAdminMutation();
+  const [updateAdmin] = useUpdateAdminMutation();
+  const [deleteAdmin] = useDeleteAdminMutation();
 
-  const loadAdmins = useCallback(async () => {
-    setIsLoading(true);
-    setError("");
-    try {
-      const result = await listAdmins({
-        page: currentPage,
-        pageSize: ITEMS_PER_PAGE,
-        search: searchQuery,
-      });
-      setAdminRows(result.data);
-      setTotalItems(result.pagination.total);
-      setTotalPages(Math.max(result.pagination.total_pages, 1));
-    } catch {
-      setError("Unable to load admins.");
-      setAdminRows([]);
-      setTotalItems(0);
-      setTotalPages(1);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPage, searchQuery]);
+  const adminRows = data?.data ?? [];
+  const totalItems = data?.pagination.total ?? 0;
+  const totalPages = Math.max(data?.pagination.total_pages ?? 1, 1);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadAdmins();
-  }, [loadAdmins]);
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const openView = (admin: Admin) => {
     setSelectedAdmin(admin);
@@ -82,29 +68,28 @@ export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
   };
 
   const handleAdd = async (input: AdminCreateInput) => {
-    await createAdmin(input);
+    await createAdmin(input).unwrap();
     if (currentPage !== 1) {
       setCurrentPage(1);
     } else {
-      await loadAdmins();
+      await refetch();
     }
   };
 
   const handleEdit = async (adminId: string, input: AdminUpdateInput) => {
-    const updated = await updateAdmin(adminId, input);
-    setAdminRows((rows) => rows.map((admin) => (admin.id === adminId ? updated : admin)));
+    const updated = await updateAdmin({ id: adminId, input }).unwrap();
     setSelectedAdmin(updated);
   };
 
   const handleDelete = async (adminId: string) => {
-    await deleteAdmin(adminId);
+    await deleteAdmin(adminId).unwrap();
     const nextTotal = Math.max(totalItems - 1, 0);
     const nextTotalPages = Math.max(Math.ceil(nextTotal / ITEMS_PER_PAGE), 1);
     if (currentPage > nextTotalPages) {
       setCurrentPage(nextTotalPages);
       return;
     }
-    await loadAdmins();
+    await refetch();
   };
 
   return (
@@ -121,7 +106,7 @@ export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
       <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
         {error ? (
           <div className="px-6 py-4 border-b border-border bg-red-50 text-sm text-red-700">
-            {error}
+            Unable to load admins. Please try again.
           </div>
         ) : null}
         <div className="overflow-x-auto">

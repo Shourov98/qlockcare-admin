@@ -13,7 +13,7 @@ export type AdminStatus =
 export type AdminScope = "AGENCIES" | "CLINICAL" | "SUPPORT";
 
 // Mirror backend's PlatformAdminResponse
-type PlatformAdmin = {
+export type PlatformAdmin = {
   id: string;
   email: string;
   full_name: string;
@@ -49,7 +49,7 @@ export type AdminListResult = {
   };
 };
 
-type PlatformAdminListResult = {
+export type PlatformAdminListResult = {
   data: PlatformAdmin[];
   pagination: AdminListResult["pagination"];
 };
@@ -77,7 +77,7 @@ function formatDate(value: string): string {
   return date.toISOString().split("T")[0];
 }
 
-function mapAdmin(admin: PlatformAdmin): Admin {
+export function mapPlatformAdmin(admin: PlatformAdmin): Admin {
   return {
     id: admin.id,
     name: admin.full_name,
@@ -107,7 +107,7 @@ export async function listAdmins(params: {
 
   const result = await apiRequest<PlatformAdminListResult>(`/admin/admins?${query}`);
   return {
-    data: result.data.map(mapAdmin),
+    data: result.data.map(mapPlatformAdmin),
     pagination: result.pagination,
   };
 }
@@ -122,7 +122,7 @@ export async function createAdmin(input: AdminCreateInput): Promise<Admin> {
       scopes: input.scopes,
     }),
   });
-  return mapAdmin(result);
+  return mapPlatformAdmin(result);
 }
 
 export async function updateAdmin(id: string, input: AdminUpdateInput): Promise<Admin> {
@@ -138,7 +138,7 @@ export async function updateAdmin(id: string, input: AdminUpdateInput): Promise<
     method: "PATCH",
     body: JSON.stringify(body),
   });
-  return mapAdmin(result);
+  return mapPlatformAdmin(result);
 }
 
 export async function deleteAdmin(id: string): Promise<void> {

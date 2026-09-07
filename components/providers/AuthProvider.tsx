@@ -6,18 +6,18 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
 } from "react";
 
 import {
   ApiError,
   clearTokens,
   getAccessToken,
-  getMe,
-  login as loginRequest,
-  logout as logoutRequest,
+  saveTokens,
   type CurrentUser,
 } from "@/lib/api";
+import { useLazyGetMeQuery, useLoginMutation, useLogoutMutation } from "@/store/api/authApi";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { sessionCleared, sessionLoaded, sessionLoading } from "@/store/slices/sessionSlice";
 
 type AuthContextValue = {
   user: CurrentUser | null;
@@ -30,53 +30,16 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<CurrentUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { user, status } = useAppSelector((state) => state.session);
+  const [getMe] = useLazyGetMeQuery();
+  const [loginRequest] = useLoginMutation();
+  const [logoutRequest] = useLogoutMutation();
 
-  const loadCurrentUser = useCallback(async () => {
-    if (!getAccessToken()) {
-      setUser(null);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const currentUser = await getMe();
-      // Accept both SUPER_ADMIN (full cross-tenant) and PLATFORM_ADMIN
-      // (scoped cross-tenant via admin_scopes). The Sidebar uses the
-      // current user's role + scopes to decide which items to show.
-      if (
-        currentUser.role !== "SUPER_ADMIN" &&
-        currentUser.role !== "PLATFORM_ADMIN"
-      ) {
-        clearTokens();
-        throw new ApiError(
-          403,
-          "Only super admin or platform admin accounts can access this dashboard.",
-        );
-      }
-      setUser(currentUser);
-    } catch (error) {
-      clearTokens();
-      setUser(null);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadCurrentUser().catch(() => {
-      setIsLoading(false);
-    });
-  }, [loadCurrentUser]);
-
-  const login = useCallback(async (email: string, password: string) => {
-    const data = await loginRequest(email, password);
+  const assertDashboardRole = useCallback((currentUser: CurrentUser) => {
     if (
-      data.user.role !== "SUPER_ADMIN" &&
-      data.user.role !== "PLATFORM_ADMIN"
+      currentUser.role !== "SUPER_ADMIN" &&
+      currentUser.role !== "PLATFORM_ADMIN"
     ) {
       clearTokens();
       throw new ApiError(
@@ -84,23 +47,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         "Only super admin or platform admin accounts can access this dashboard.",
       );
     }
-    setUser(data.user);
   }, []);
 
+  const loadCurrentUser = useCallback(async () => {
+    dispatch(sessionLoading());
+    if (!getAccessToken()) {
+      dispatch(sessionCleared());
+      return;
+    }
+
+    try {
+      const currentUser = await getMe().unwrap();
+      assertDashboardRole(currentUser);
+      dispatch(sessionLoaded(currentUser));
+    } catch (error) {
+      clearTokens();
+      dispatch(sessionCleared());
+      throw error;
+    }
+  }, [assertDashboardRole, dispatch, getMe]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadCurrentUser().catch(() => {
+      dispatch(sessionCleared());
+    });
+  }, [dispatch, loadCurrentUser]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    const data = await loginRequest({ email, password }).unwrap();
+    saveTokens(data);
+    assertDashboardRole(data.user);
+    dispatch(sessionLoaded(data.user));
+  }, [assertDashboardRole, dispatch, loginRequest]);
+
   const logout = useCallback(async () => {
-    await logoutRequest();
-    setUser(null);
-  }, []);
+    try {
+      await logoutRequest().unwrap();
+    } finally {
+      clearTokens();
+      dispatch(sessionCleared());
+    }
+  }, [dispatch, logoutRequest]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
-      isLoading,
+      isLoading: status === "idle" || status === "loading",
       login,
       logout,
       reloadUser: loadCurrentUser,
     }),
-    [isLoading, loadCurrentUser, login, logout, user],
+    [loadCurrentUser, login, logout, status, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
