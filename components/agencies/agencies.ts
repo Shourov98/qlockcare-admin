@@ -43,6 +43,7 @@ export type Agency = {
   subscriptionPriceDisplay: string;
   billingCycle: string;
   isTrialing: boolean;
+  trialStartedAt: string | null;
   trialEndsAt: string | null;
   hasStripeSubscription: boolean;
   cancelAtPeriodEnd: boolean;
@@ -116,6 +117,7 @@ function mapAgency(raw: PlatformAgency): Agency {
     subscriptionPriceDisplay: formatPrice(raw.subscription_price_cents),
     billingCycle: raw.subscription_billing_cycle,
     isTrialing: raw.status === "TRIAL",
+    trialStartedAt: raw.trial_started_at,
     trialEndsAt: raw.trial_ends_at,
     hasStripeSubscription: !!raw.stripe_subscription_id,
     cancelAtPeriodEnd: raw.cancel_at_period_end,
