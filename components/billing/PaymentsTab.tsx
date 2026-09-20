@@ -1,6 +1,4 @@
-import React from "react";
-import { PendingBackendBanner } from "./PendingBackendBanner";
-import { MockedEmptyState } from "./MockedEmptyState";
+import { PlatformBillingTable } from "./PlatformBillingTable";
 
 /**
  * Same pattern as InvoicesTab — no fake transaction rows. The
@@ -10,23 +8,6 @@ import { MockedEmptyState } from "./MockedEmptyState";
  */
 export function PaymentsTab() {
   return (
-    <div className="space-y-4">
-      <PendingBackendBanner
-        tabName="Payments"
-        endpoint="GET /admin/billing/payments + GET /admin/billing/refunds"
-      />
-      <div className="overflow-hidden">
-        <div className="flex items-center justify-between py-5">
-          <h2 className="text-[24px] font-bold text-foreground">
-            Payment Transactions
-          </h2>
-        </div>
-        <MockedEmptyState
-          feature="Payments"
-          endpoint="GET /admin/billing/payments"
-          hint="Charges across all agencies, with refund support. A live list will land here once the endpoint exists — no fabricated transactions are shown."
-        />
-      </div>
-    </div>
+    <div className="space-y-4"><h2 className="text-[24px] font-bold text-foreground">Payment Transactions</h2><PlatformBillingTable resource="payments" /></div>
   );
 }
