@@ -41,9 +41,19 @@ export function Sidebar() {
     { title: "Staff", icon: Briefcase, href: "/staff", requiredScope: "CLINICAL" },
     { title: "Admins", icon: Zap, href: "/admins", requiredRole: "SUPER_ADMIN" },
     { title: "Billing & Subscriptions", icon: CreditCard, href: "/billing", requiredScope: "BILLING" },
-    { title: "Documents & Licenses", icon: FileText, href: "/documents" },
+    {
+      title: "Documents & Licenses",
+      icon: FileText,
+      href: "/documents",
+      requiredScope: "AGENCIES",
+    },
     // { title: "Integrations & Health", icon: Plug, href: "/integrations" },
-    { title: "Support / Tickets", icon: Headphones, href: "/support" },
+    {
+      title: "Support / Tickets",
+      icon: Headphones,
+      href: "/support",
+      requiredScope: "SUPPORT",
+    },
     {
       title: "Audit Logs",
       icon: ClipboardList,
