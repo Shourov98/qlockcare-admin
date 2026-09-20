@@ -26,6 +26,11 @@ const SCOPE_OPTIONS: { value: AdminScope; label: string; description: string }[]
     label: "Support",
     description: "View audit logs and notifications across all tenants.",
   },
+  {
+    value: "BILLING",
+    label: "Billing",
+    description: "View platform-wide Stripe invoices, payments, prices, and coupons.",
+  },
 ];
 
 interface AdminEditModalProps {

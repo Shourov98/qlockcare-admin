@@ -9,11 +9,8 @@ import {
   Briefcase,
   CreditCard,
   FileText,
-  Plug,
   Headphones,
   ClipboardList,
-  LayoutTemplate,
-  FileBarChart,
   Settings,
   Zap,
 } from "lucide-react";
@@ -27,7 +24,7 @@ type SidebarItem = {
   // Sidebar items with `requiredScope` are hidden from PLATFORM_ADMIN
   // users who don't hold the scope. SUPER_ADMIN always sees them.
   // Items without `requiredScope` are visible to both roles.
-  requiredScope?: "AGENCIES" | "CLINICAL" | "SUPPORT";
+  requiredScope?: "AGENCIES" | "CLINICAL" | "SUPPORT" | "BILLING";
   // `requiredRole` strictly limits an item to one role (e.g. only
   // SUPER_ADMIN can manage admins).
   requiredRole?: "SUPER_ADMIN";
@@ -43,7 +40,7 @@ export function Sidebar() {
     { title: "Clients", icon: Users, href: "/users", requiredScope: "CLINICAL" },
     { title: "Staff", icon: Briefcase, href: "/staff", requiredScope: "CLINICAL" },
     { title: "Admins", icon: Zap, href: "/admins", requiredRole: "SUPER_ADMIN" },
-    { title: "Billing & Subscriptions", icon: CreditCard, href: "/billing" },
+    { title: "Billing & Subscriptions", icon: CreditCard, href: "/billing", requiredScope: "BILLING" },
     { title: "Documents & Licenses", icon: FileText, href: "/documents" },
     // { title: "Integrations & Health", icon: Plug, href: "/integrations" },
     { title: "Support / Tickets", icon: Headphones, href: "/support" },

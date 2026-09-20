@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { AdminCreateInput } from "./admins";
+import { AdminCreateInput, AdminScope } from "./admins";
 import { ApiError } from "@/lib/api";
 
 // Available scopes mirror the backend's AdminScope enum. Adding a new
 // scope on the backend requires adding it here too — the only other
-// change is to the backend CHECK constraint in migration 0024.
-const SCOPE_OPTIONS: { value: "AGENCIES" | "CLINICAL" | "SUPPORT"; label: string; description: string }[] = [
+// change is to the backend CHECK constraint and scope migration.
+const SCOPE_OPTIONS: { value: AdminScope; label: string; description: string }[] = [
   {
     value: "AGENCIES",
     label: "Agencies",
@@ -21,6 +21,11 @@ const SCOPE_OPTIONS: { value: "AGENCIES" | "CLINICAL" | "SUPPORT"; label: string
     label: "Support",
     description: "View audit logs and notifications across all tenants.",
   },
+  {
+    value: "BILLING",
+    label: "Billing",
+    description: "View platform-wide Stripe invoices, payments, prices, and coupons.",
+  },
 ];
 
 interface AdminAddModalProps {
@@ -33,13 +38,13 @@ export function AdminAddModal({ isOpen, onClose, onAdd }: AdminAddModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [scopes, setScopes] = useState<Set<"AGENCIES" | "CLINICAL" | "SUPPORT">>(
+  const [scopes, setScopes] = useState<Set<AdminScope>>(
     new Set(),
   );
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const toggleScope = (scope: "AGENCIES" | "CLINICAL" | "SUPPORT") => {
+  const toggleScope = (scope: AdminScope) => {
     setScopes((prev) => {
       const next = new Set(prev);
       if (next.has(scope)) {

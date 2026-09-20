@@ -10,7 +10,7 @@ export type AdminStatus =
   | "ARCHIVED";
 
 // Mirror qclockcare_backend AdminScope enum (UPPERCASE)
-export type AdminScope = "AGENCIES" | "CLINICAL" | "SUPPORT";
+export type AdminScope = "AGENCIES" | "CLINICAL" | "SUPPORT" | "BILLING";
 
 // Mirror backend's PlatformAdminResponse
 export type PlatformAdmin = {
@@ -152,10 +152,12 @@ export const SCOPE_LABEL: Record<AdminScope, string> = {
   AGENCIES: "Agencies",
   CLINICAL: "Clinical",
   SUPPORT: "Support",
+  BILLING: "Billing",
 };
 
 export const SCOPE_DESCRIPTION: Record<AdminScope, string> = {
   AGENCIES: "View and update agency status, plan, suspension across tenants.",
   CLINICAL: "View clients and staff across tenants (read-only).",
   SUPPORT: "View audit logs and notifications across tenants.",
+  BILLING: "View platform-wide Stripe invoices, payments, prices, and coupons.",
 };
