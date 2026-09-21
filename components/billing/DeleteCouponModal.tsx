@@ -1,8 +1,9 @@
 import React from "react";
 import { X, Trash2 } from "lucide-react";
+import type { LegacyCoupon } from "./types";
 
 interface DeleteCouponModalProps {
-  item: any;
+  item: LegacyCoupon;
   onClose: () => void;
   onConfirm: () => void;
 }

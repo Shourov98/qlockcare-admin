@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { X, Send } from "lucide-react";
+import type { LegacyTrial } from "./types";
 
 interface SendEmailModalProps {
-  item: any;
+  item: LegacyTrial;
   onClose: () => void;
   onSend: (subject: string, message: string) => void;
 }

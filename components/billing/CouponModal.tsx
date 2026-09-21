@@ -1,8 +1,9 @@
 import React from "react";
 import { X } from "lucide-react";
+import type { LegacyCoupon } from "./types";
 
 interface CouponModalProps {
-  item: any;
+  item: LegacyCoupon | null;
   onClose: () => void;
   onSave: () => void;
 }

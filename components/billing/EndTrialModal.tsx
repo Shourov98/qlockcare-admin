@@ -1,8 +1,9 @@
 import React from "react";
 import { X, ShieldAlert } from "lucide-react";
+import type { LegacyTrial } from "./types";
 
 interface EndTrialModalProps {
-  item: any;
+  item: LegacyTrial;
   onClose: () => void;
   onConfirm: () => void;
 }

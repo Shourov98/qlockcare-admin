@@ -1,4 +1,12 @@
 import { CheckCircle2, AlertTriangle, FlaskConical, Star } from "lucide-react";
+import type {
+  LegacyBillingInvoice,
+  LegacyCoupon,
+  LegacyPayment,
+  LegacyPlan,
+  LegacySubscription,
+  LegacyTrial,
+} from "./types";
 
 export const billingSummaryData = [
   {
@@ -31,7 +39,7 @@ export const billingSummaryData = [
   }
 ];
 
-export const subscriptionsData = [
+export const subscriptionsData: LegacySubscription[] = [
   {
     id: 1,
     agencyName: "Digital Creators Co",
@@ -284,7 +292,7 @@ export const subscriptionsData = [
   }
 ];
 
-export const invoicesData = Array.from({ length: 25 }, (_, i) => ({
+export const invoicesData: LegacyBillingInvoice[] = Array.from({ length: 25 }, (_, i) => ({
   id: i + 1,
   invoiceNumber: `INV-2024-${String(i + 1).padStart(3, '0')}`,
   agencyName: `Agency ${i + 1}`,
@@ -294,7 +302,7 @@ export const invoicesData = Array.from({ length: 25 }, (_, i) => ({
   status: i % 4 === 0 ? "Overdue" : i % 3 === 0 ? "Pending" : "Paid"
 }));
 
-export const paymentsData = Array.from({ length: 25 }, (_, i) => ({
+export const paymentsData: LegacyPayment[] = Array.from({ length: 25 }, (_, i) => ({
   id: i + 1,
   transactionId: `TXN-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
   agencyName: `Agency ${i + 1}`,
@@ -304,7 +312,7 @@ export const paymentsData = Array.from({ length: 25 }, (_, i) => ({
   status: i % 5 === 0 ? "Failed" : i % 8 === 0 ? "Refunded" : "Successful"
 }));
 
-export const trialsData = Array.from({ length: 15 }, (_, i) => ({
+export const trialsData: LegacyTrial[] = Array.from({ length: 15 }, (_, i) => ({
   id: i + 1,
   agencyName: `Trial Agency ${i + 1}`,
   type: i % 3 === 0 ? "Demo" : "Trial",
@@ -314,7 +322,7 @@ export const trialsData = Array.from({ length: 15 }, (_, i) => ({
   status: i > 10 ? "Expired" : "Active"
 }));
 
-export const plansData = [
+export const plansData: LegacyPlan[] = [
   {
     name: "Starter",
     price: "$99",
@@ -335,7 +343,7 @@ export const plansData = [
   }
 ];
 
-export const couponsData = [
+export const couponsData: LegacyCoupon[] = [
   { id: 1, code: "WELCOME20", discount: "20% OFF", uses: 45, maxUses: 100, expiry: "2024-12-31", status: "Active" },
   { id: 2, code: "SUMMER50", discount: "50% OFF", uses: 100, maxUses: 100, expiry: "2024-08-31", status: "Expired" },
   { id: 3, code: "VIP100", discount: "$100 OFF", uses: 12, maxUses: 50, expiry: "2025-01-01", status: "Active" }

@@ -4,15 +4,16 @@ import { paymentsData } from "./billing";
 import { Pagination } from "../common/Pagination";
 import { ViewReceiptModal } from "./ViewReceiptModal";
 import { RefundModal } from "./RefundModal";
+import type { LegacyPayment } from "./types";
 
 export function PaymentsTable({ searchQuery = "" }: { searchQuery?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<LegacyPayment | null>(null);
   const [selectedAction, setSelectedAction] = useState<"receipt" | "refund" | null>(null);
 
-  const openModal = (item: any, action: "receipt" | "refund") => {
+  const openModal = (item: LegacyPayment, action: "receipt" | "refund") => {
     setSelectedItem(item);
     setSelectedAction(action);
   };
@@ -22,7 +23,7 @@ export function PaymentsTable({ searchQuery = "" }: { searchQuery?: string }) {
     setSelectedAction(null);
   };
 
-  const handleDownloadReceipt = (item: any) => {
+  const handleDownloadReceipt = (item: LegacyPayment) => {
     const content = `RECEIPT\n\nTransaction ID: ${item.transactionId}\nAgency: ${item.agencyName}\nAmount Paid: ${item.amount}\nDate: ${item.date}\nPayment Method: ${item.method}\nStatus: ${item.status}`;
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
     const link = document.createElement("a");

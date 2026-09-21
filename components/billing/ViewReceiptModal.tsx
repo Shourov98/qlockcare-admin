@@ -1,8 +1,9 @@
 import React from "react";
 import { X, Download } from "lucide-react";
+import type { LegacyPayment } from "./types";
 
 interface ViewReceiptModalProps {
-  item: any;
+  item: LegacyPayment;
   onClose: () => void;
   onDownload: () => void;
 }

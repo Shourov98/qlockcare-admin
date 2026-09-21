@@ -1,8 +1,9 @@
 import React from "react";
 import { X, AlertTriangle } from "lucide-react";
+import type { LegacyPayment } from "./types";
 
 interface RefundModalProps {
-  item: any;
+  item: LegacyPayment;
   onClose: () => void;
   onConfirm: () => void;
 }

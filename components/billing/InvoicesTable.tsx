@@ -3,15 +3,16 @@ import { Download, Eye } from "lucide-react";
 import { invoicesData } from "./billing";
 import { Pagination } from "../common/Pagination";
 import { ViewInvoiceModal } from "./ViewInvoiceModal";
+import type { LegacyBillingInvoice } from "./types";
 
 export function InvoicesTable({ searchQuery = "" }: { searchQuery?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
 
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<LegacyBillingInvoice | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-  const openModal = (item: any) => {
+  const openModal = (item: LegacyBillingInvoice) => {
     setSelectedItem(item);
     setIsViewModalOpen(true);
   };
@@ -21,7 +22,7 @@ export function InvoicesTable({ searchQuery = "" }: { searchQuery?: string }) {
     setIsViewModalOpen(false);
   };
 
-  const handleDownload = (item: any) => {
+  const handleDownload = (item: LegacyBillingInvoice) => {
     const content = `INVOICE\n\nNumber: ${item.invoiceNumber}\nAgency: ${item.agencyName}\nAmount: ${item.amount}\nIssue Date: ${item.issueDate}\nDue Date: ${item.dueDate}\nStatus: ${item.status}`;
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
     const link = document.createElement("a");

@@ -1,8 +1,9 @@
 import React from "react";
 import { X } from "lucide-react";
+import type { LegacyPlan } from "./types";
 
 interface PlanModalProps {
-  item: any;
+  item: LegacyPlan | null;
   onClose: () => void;
   onSave: () => void;
 }

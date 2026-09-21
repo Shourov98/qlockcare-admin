@@ -4,15 +4,16 @@ import { trialsData } from "./billing";
 import { Pagination } from "../common/Pagination";
 import { SendEmailModal } from "./SendEmailModal";
 import { EndTrialModal } from "./EndTrialModal";
+import type { LegacyTrial } from "./types";
 
 export function TrialsTable({ searchQuery = "" }: { searchQuery?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<LegacyTrial | null>(null);
   const [selectedAction, setSelectedAction] = useState<"email" | "end" | null>(null);
 
-  const openModal = (item: any, action: "email" | "end") => {
+  const openModal = (item: LegacyTrial, action: "email" | "end") => {
     setSelectedItem(item);
     setSelectedAction(action);
   };

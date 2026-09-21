@@ -1,8 +1,9 @@
 import React from "react";
 import { X } from "lucide-react";
+import type { LegacySubscription } from "./types";
 
 interface EditSubscriptionModalProps {
-  item: any;
+  item: LegacySubscription;
   onClose: () => void;
 }
 
