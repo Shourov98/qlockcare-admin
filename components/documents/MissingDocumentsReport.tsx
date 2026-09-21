@@ -13,9 +13,11 @@ import {
     documentStatusColor,
     listMissingDocuments,
 } from '../compliance/compliance';
+import { Agency, listAgencies } from '../agencies/agencies';
 
 export function MissingDocumentsReport() {
     const [docs, setDocs] = useState<AgencyDocument[]>([]);
+    const [agencies, setAgencies] = useState<Agency[]>([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
@@ -55,6 +57,12 @@ export function MissingDocumentsReport() {
         refresh();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]);
+
+    useEffect(() => {
+        void listAgencies({ page: 1, pageSize: 100 })
+            .then((result) => setAgencies(result.data))
+            .catch(() => setAgencies([]));
+    }, []);
 
     const onSearchChange = (value: string) => {
         setSearchQuery(value);
@@ -189,7 +197,9 @@ export function MissingDocumentsReport() {
 
             <AddMissingDocumentModal
                 isOpen={isAddModalOpen}
-                onClose={() => { setAddModalOpen(false); refresh(); }}
+                agencies={agencies}
+                onClose={() => setAddModalOpen(false)}
+                onCreated={() => { setAddModalOpen(false); refresh(); }}
             />
         </>
     );

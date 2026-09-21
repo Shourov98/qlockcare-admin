@@ -82,6 +82,7 @@ export type AgencyDocument = {
   description: string | null;
   expiresAt: string | null;
   fileUrl: string | null;
+  extra: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 };
@@ -181,8 +182,9 @@ function mapDocument(d: AgencyDocumentBackend): AgencyDocument {
     docType: d.doc_type,
     status: d.status,
     description: d.description,
-    expiresAt: formatDate(d.expires_at),
+    expiresAt: d.expires_at ? formatDate(d.expires_at) : null,
     fileUrl: d.file_url,
+    extra: d.extra,
     createdAt: formatDate(d.created_at),
     updatedAt: formatDate(d.updated_at),
   };
