@@ -1,53 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Download, RefreshCcw } from "lucide-react";
 import { paymentsData } from "./billing";
 import { Pagination } from "../common/Pagination";
-import { ViewReceiptModal } from "./ViewReceiptModal";
-import { RefundModal } from "./RefundModal";
-import type { LegacyPayment } from "./types";
 
 export function PaymentsTable({ searchQuery = "" }: { searchQuery?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  const [selectedItem, setSelectedItem] = useState<LegacyPayment | null>(null);
-  const [selectedAction, setSelectedAction] = useState<"receipt" | "refund" | null>(null);
-
-  const openModal = (item: LegacyPayment, action: "receipt" | "refund") => {
-    setSelectedItem(item);
-    setSelectedAction(action);
-  };
-
-  const closeModal = () => {
-    setSelectedItem(null);
-    setSelectedAction(null);
-  };
-
-  const handleDownloadReceipt = (item: LegacyPayment) => {
-    const content = `RECEIPT\n\nTransaction ID: ${item.transactionId}\nAgency: ${item.agencyName}\nAmount Paid: ${item.amount}\nDate: ${item.date}\nPayment Method: ${item.method}\nStatus: ${item.status}`;
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Receipt_${item.transactionId}.txt`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleConfirmRefund = () => {
-    console.log("Refund issued for", selectedItem?.transactionId);
-  };
-
   const filteredPayments = paymentsData.filter((pay) =>
     pay.agencyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     pay.transactionId.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
 
   const totalPages = Math.ceil(filteredPayments.length / ITEMS_PER_PAGE);
   const currentData = filteredPayments.slice(
@@ -66,6 +29,9 @@ export function PaymentsTable({ searchQuery = "" }: { searchQuery?: string }) {
 
   return (
     <main className="bg-card rounded-[12px] shadow-[0px_1px_4px_rgba(0,0,0,0.08)] overflow-hidden">
+      <div className="border-b border-amber-200 bg-amber-50 px-6 py-3 text-sm text-amber-900">
+        Legacy payment records are retained for layout reference. Use the active Payment Transactions tab for live Stripe data; refunds are unavailable.
+      </div>
       <table className="w-full text-left text-[14px] text-foreground">
         <thead className="bg-[#066a5f] text-[12px] tracking-[0.05em] font-semibold text-white uppercase border-b border-border">
           <tr>
@@ -93,17 +59,19 @@ export function PaymentsTable({ searchQuery = "" }: { searchQuery?: string }) {
               </td>
               <td className="px-6 py-4 flex space-x-2 justify-center">
                 <button
-                  onClick={() => openModal(item, "receipt")}
+                  disabled
                   aria-label="Receipt"
-                  className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground"
+                  title="Use the live payment table for receipt details"
+                  className="p-2 rounded-full text-muted-foreground opacity-50 cursor-not-allowed"
                 >
                   <Download className="w-5 h-5" />
                 </button>
                 {item.status === "Successful" && (
                   <button
-                    onClick={() => openModal(item, "refund")}
+                    disabled
                     aria-label="Refund"
-                    className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground"
+                    title="Refunds are not available in this dashboard"
+                    className="p-2 rounded-full text-muted-foreground opacity-50 cursor-not-allowed"
                   >
                     <RefreshCcw className="w-5 h-5" />
                   </button>
@@ -122,20 +90,6 @@ export function PaymentsTable({ searchQuery = "" }: { searchQuery?: string }) {
         onPageChange={setCurrentPage}
         itemName="transactions"
       />
-      {selectedAction === "receipt" && selectedItem && (
-        <ViewReceiptModal
-          item={selectedItem}
-          onClose={closeModal}
-          onDownload={() => handleDownloadReceipt(selectedItem)}
-        />
-      )}
-      {selectedAction === "refund" && selectedItem && (
-        <RefundModal
-          item={selectedItem}
-          onClose={closeModal}
-          onConfirm={handleConfirmRefund}
-        />
-      )}
     </main>
   );
 }

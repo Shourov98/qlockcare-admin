@@ -1,5 +1,6 @@
 import React from "react";
 import { X } from "lucide-react";
+import { LegacyBillingUnavailableNotice } from "./LegacyBillingUnavailableNotice";
 import type { LegacyCoupon } from "./types";
 
 interface CouponModalProps {
@@ -8,7 +9,7 @@ interface CouponModalProps {
   onSave: () => void;
 }
 
-export function CouponModal({ item, onClose, onSave }: CouponModalProps) {
+export function CouponModal({ item, onClose }: CouponModalProps) {
   const isEditing = !!item;
 
   return (
@@ -25,6 +26,7 @@ export function CouponModal({ item, onClose, onSave }: CouponModalProps) {
             <X className="w-5 h-5" />
           </button>
         </div>
+        <LegacyBillingUnavailableNotice action="Coupon changes" />
         
         <div className="p-6 space-y-4 flex-1 overflow-y-auto">
           <div className="grid grid-cols-2 gap-4">
@@ -89,13 +91,7 @@ export function CouponModal({ item, onClose, onSave }: CouponModalProps) {
           >
             Cancel
           </button>
-          <button 
-            onClick={() => {
-              onSave();
-              onClose();
-            }}
-            className="px-4 py-2 rounded-[8px] bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
-          >
+          <button disabled title="Coupon management requires a backend workflow" className="px-4 py-2 rounded-[8px] bg-primary text-primary-foreground text-sm font-medium opacity-50 cursor-not-allowed">
             {isEditing ? "Save Changes" : "Create Coupon"}
           </button>
         </div>

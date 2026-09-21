@@ -1,5 +1,6 @@
 import React from "react";
 import { X } from "lucide-react";
+import { LegacyBillingUnavailableNotice } from "./LegacyBillingUnavailableNotice";
 import type { LegacySubscription } from "./types";
 
 interface EditSubscriptionModalProps {
@@ -22,6 +23,7 @@ export function EditSubscriptionModal({ item, onClose }: EditSubscriptionModalPr
             <X className="w-5 h-5" />
           </button>
         </div>
+        <LegacyBillingUnavailableNotice action="Subscription changes" />
         
         <div className="p-6 space-y-4 flex-1 overflow-y-auto">
           <div className="space-y-1.5">
@@ -73,10 +75,7 @@ export function EditSubscriptionModal({ item, onClose }: EditSubscriptionModalPr
           >
             Cancel
           </button>
-          <button 
-            onClick={onClose}
-            className="px-4 py-2 rounded-[8px] bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
-          >
+          <button disabled title="Subscription changes are handled through Stripe Customer Portal" className="px-4 py-2 rounded-[8px] bg-primary text-primary-foreground text-sm font-medium opacity-50 cursor-not-allowed">
             Save Changes
           </button>
         </div>

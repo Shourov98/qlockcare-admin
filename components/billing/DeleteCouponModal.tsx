@@ -1,5 +1,6 @@
 import React from "react";
 import { X, Trash2 } from "lucide-react";
+import { LegacyBillingUnavailableNotice } from "./LegacyBillingUnavailableNotice";
 import type { LegacyCoupon } from "./types";
 
 interface DeleteCouponModalProps {
@@ -8,7 +9,7 @@ interface DeleteCouponModalProps {
   onConfirm: () => void;
 }
 
-export function DeleteCouponModal({ item, onClose, onConfirm }: DeleteCouponModalProps) {
+export function DeleteCouponModal({ item, onClose }: DeleteCouponModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-[16px] shadow-lg w-full max-w-sm overflow-hidden flex flex-col">
@@ -24,6 +25,7 @@ export function DeleteCouponModal({ item, onClose, onConfirm }: DeleteCouponModa
             <X className="w-5 h-5" />
           </button>
         </div>
+        <LegacyBillingUnavailableNotice action="Coupon deletion" />
         
         <div className="p-6 space-y-4">
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -39,13 +41,7 @@ export function DeleteCouponModal({ item, onClose, onConfirm }: DeleteCouponModa
           >
             Cancel
           </button>
-          <button 
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
-            className="px-4 py-2 rounded-[8px] bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors"
-          >
+          <button disabled title="Coupon management requires a backend workflow" className="px-4 py-2 rounded-[8px] bg-red-600 text-white text-sm font-medium opacity-50 cursor-not-allowed">
             Delete
           </button>
         </div>

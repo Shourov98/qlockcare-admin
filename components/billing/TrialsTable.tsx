@@ -1,43 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Mail, ShieldAlert } from "lucide-react";
 import { trialsData } from "./billing";
 import { Pagination } from "../common/Pagination";
-import { SendEmailModal } from "./SendEmailModal";
-import { EndTrialModal } from "./EndTrialModal";
-import type { LegacyTrial } from "./types";
 
 export function TrialsTable({ searchQuery = "" }: { searchQuery?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  const [selectedItem, setSelectedItem] = useState<LegacyTrial | null>(null);
-  const [selectedAction, setSelectedAction] = useState<"email" | "end" | null>(null);
-
-  const openModal = (item: LegacyTrial, action: "email" | "end") => {
-    setSelectedItem(item);
-    setSelectedAction(action);
-  };
-
-  const closeModal = () => {
-    setSelectedItem(null);
-    setSelectedAction(null);
-  };
-
-  const handleSendEmail = (subject: string, message: string) => {
-    console.log("Email sent to", selectedItem?.agencyName, { subject, message });
-  };
-
-  const handleEndTrial = () => {
-    console.log("Ended trial for", selectedItem?.agencyName);
-  };
-
   const filteredTrials = trialsData.filter((trial) =>
     trial.agencyName.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
 
   const totalPages = Math.ceil(filteredTrials.length / ITEMS_PER_PAGE);
   const currentData = filteredTrials.slice(
@@ -55,6 +27,9 @@ export function TrialsTable({ searchQuery = "" }: { searchQuery?: string }) {
 
   return (
     <main className="bg-card rounded-[12px] shadow-[0px_1px_4px_rgba(0,0,0,0.08)] overflow-hidden">
+      <div className="border-b border-amber-200 bg-amber-50 px-6 py-3 text-sm text-amber-900">
+        Legacy trial records are retained for layout reference. Trial messages and early termination require approved backend workflows.
+      </div>
       <table className="w-full text-left text-[14px] text-foreground">
         <thead className="bg-[#066a5f] text-[12px] tracking-[0.05em] font-semibold text-white uppercase border-b border-border">
           <tr>
@@ -84,17 +59,19 @@ export function TrialsTable({ searchQuery = "" }: { searchQuery?: string }) {
               </td>
               <td className="px-6 py-4 flex space-x-2 justify-center">
                 <button
-                  onClick={() => openModal(item, "email")}
+                  disabled
                   aria-label="Send Email"
-                  className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground"
+                  title="Billing email delivery is not available"
+                  className="p-2 rounded-full text-muted-foreground opacity-50 cursor-not-allowed"
                 >
                   <Mail className="w-5 h-5" />
                 </button>
                 {item.status === "Active" && (
                   <button
-                    onClick={() => openModal(item, "end")}
+                    disabled
                     aria-label="End Trial"
-                    className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground0"
+                    title="Trial termination is not available"
+                    className="p-2 rounded-full text-muted-foreground opacity-50 cursor-not-allowed"
                   >
                     <ShieldAlert className="w-5 h-5" />
                   </button>
@@ -113,22 +90,6 @@ export function TrialsTable({ searchQuery = "" }: { searchQuery?: string }) {
         onPageChange={setCurrentPage}
         itemName="trials"
       />
-
-      {/* Modals */}
-      {selectedAction === "email" && selectedItem && (
-        <SendEmailModal
-          item={selectedItem}
-          onClose={closeModal}
-          onSend={handleSendEmail}
-        />
-      )}
-      {selectedAction === "end" && selectedItem && (
-        <EndTrialModal
-          item={selectedItem}
-          onClose={closeModal}
-          onConfirm={handleEndTrial}
-        />
-      )}
     </main>
   );
 }

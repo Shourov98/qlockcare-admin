@@ -1,12 +1,10 @@
+/* eslint-disable react-hooks/set-state-in-effect -- list refreshes when page or external filters change. */
 import React, { useEffect, useState } from "react";
-import { Loader2, ExternalLink, CreditCard } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Pagination } from "../common/Pagination";
 
 import {
   listAgenciesForBilling,
-  openAgencyPortal,
-  startAgencyCheckout,
-  type Agency,
   type AgencyStatus,
   type AgencySubscriptionPlan,
   type PaginatedAgencies,
@@ -16,13 +14,9 @@ import {
  * Subscriptions table. Replaces the prior hardcoded 25-row mock with
  * a real fetch against `GET /agencies?status_filter=&plan_filter=&search=`.
  *
- * Per-row actions:
- *   - "Manage in Stripe" → POST /agencies/{id}/billing/portal-session
- *     → window.location = portal_url
- *   - "Change plan"      → POST /agencies/{id}/billing/checkout
- *     → window.location = checkout_url
- *
- * Errors render inline (503 if FEATURE_BILLING_ENABLED=false).
+ * This retained component is read-only. The active subscription table uses the
+ * dedicated platform billing endpoint. Direct portal and plan-change actions
+ * are intentionally disabled here because they are agency self-service flows.
  */
 
 const PLAN_BADGE: Record<AgencySubscriptionPlan, string> = {
@@ -63,8 +57,6 @@ export function BillingTable({
   const [data, setData] = useState<PaginatedAgencies | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [actionBusy, setActionBusy] = useState<string | null>(null);
 
   const fetchPage = async (page: number) => {
     setLoading(true);
@@ -103,44 +95,11 @@ export function BillingTable({
   const totalPages = data?.total_pages ?? 1;
   const agencies = data?.data ?? [];
 
-  const handlePortal = async (a: Agency) => {
-    setActionError(null);
-    setActionBusy(`portal:${a.id}`);
-    try {
-      const res = await openAgencyPortal(a.id);
-      window.location.href = res.portal_url;
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Failed to open Stripe Portal.";
-      setActionError(msg);
-    } finally {
-      setActionBusy(null);
-    }
-  };
-
-  const handleChangePlan = async (a: Agency, plan: AgencySubscriptionPlan) => {
-    setActionError(null);
-    setActionBusy(`checkout:${a.id}`);
-    try {
-      const res = await startAgencyCheckout({
-        agencyId: a.id,
-        plan,
-      });
-      window.location.href = res.checkout_url;
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Failed to start Stripe Checkout.";
-      setActionError(msg);
-    } finally {
-      setActionBusy(null);
-    }
-  };
-
   return (
     <main className="">
-      {actionError && (
-        <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-[8px] text-sm text-red-700 font-medium">
-          {actionError}
-        </div>
-      )}
+      <div className="mb-3 rounded-[8px] border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        This retained subscription component is read-only. Agency billing changes happen through the agency Stripe Customer Portal.
+      </div>
 
       {loading && !data ? (
         <div className="p-8 text-center text-muted-foreground">
@@ -213,43 +172,8 @@ export function BillingTable({
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-2 flex-wrap">
-                      <button
-                        onClick={() => handlePortal(a)}
-                        disabled={actionBusy === `portal:${a.id}`}
-                        title="Open Stripe Customer Portal"
-                        className="inline-flex items-center gap-1 text-[12px] font-semibold px-3 py-1.5 rounded-[8px] bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50"
-                      >
-                        {actionBusy === `portal:${a.id}` ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : (
-                          <ExternalLink className="w-3 h-3" />
-                        )}
-                        Manage
-                      </button>
-
-                      <div className="relative">
-                        <select
-                          defaultValue=""
-                          disabled={actionBusy === `checkout:${a.id}`}
-                          onChange={(e) => {
-                            const plan = e.target.value as AgencySubscriptionPlan;
-                            e.currentTarget.value = "";
-                            if (plan) void handleChangePlan(a, plan);
-                          }}
-                          className="appearance-none cursor-pointer text-[12px] font-semibold px-3 py-1.5 rounded-[8px] border border-border bg-white text-foreground hover:bg-muted/50 disabled:opacity-50"
-                        >
-                          <option value="" disabled>
-                            Change plan…
-                          </option>
-                          {(["BASIC", "PROFESSIONAL", "ENTERPRISE"] as AgencySubscriptionPlan[])
-                            .filter((p) => p !== a.subscription_plan)
-                            .map((p) => (
-                              <option key={p} value={p}>
-                                {p}
-                              </option>
-                            ))}
-                        </select>
-                      </div>
+                      <button disabled title="Agency self-service only" className="text-[12px] font-semibold px-3 py-1.5 rounded-[8px] bg-muted text-muted-foreground cursor-not-allowed">Manage unavailable</button>
+                      <button disabled title="Agency self-service only" className="text-[12px] font-semibold px-3 py-1.5 rounded-[8px] border border-border text-muted-foreground cursor-not-allowed">Plan change unavailable</button>
                     </div>
                   </td>
                 </tr>

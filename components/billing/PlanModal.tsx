@@ -1,5 +1,6 @@
 import React from "react";
 import { X } from "lucide-react";
+import { LegacyBillingUnavailableNotice } from "./LegacyBillingUnavailableNotice";
 import type { LegacyPlan } from "./types";
 
 interface PlanModalProps {
@@ -8,7 +9,7 @@ interface PlanModalProps {
   onSave: () => void;
 }
 
-export function PlanModal({ item, onClose, onSave }: PlanModalProps) {
+export function PlanModal({ item, onClose }: PlanModalProps) {
   const isEditing = !!item;
 
   return (
@@ -25,6 +26,7 @@ export function PlanModal({ item, onClose, onSave }: PlanModalProps) {
             <X className="w-5 h-5" />
           </button>
         </div>
+        <LegacyBillingUnavailableNotice action="Plan changes" />
         
         <div className="p-6 space-y-4 flex-1 overflow-y-auto">
           <div className="space-y-1.5">
@@ -65,13 +67,7 @@ export function PlanModal({ item, onClose, onSave }: PlanModalProps) {
           >
             Cancel
           </button>
-          <button 
-            onClick={() => {
-              onSave();
-              onClose();
-            }}
-            className="px-4 py-2 rounded-[8px] bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
-          >
+          <button disabled title="Plan changes are handled through approved Stripe workflows" className="px-4 py-2 rounded-[8px] bg-primary text-primary-foreground text-sm font-medium opacity-50 cursor-not-allowed">
             {isEditing ? "Save Changes" : "Create Plan"}
           </button>
         </div>

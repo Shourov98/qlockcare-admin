@@ -1,5 +1,6 @@
 import React from "react";
 import { X, AlertTriangle } from "lucide-react";
+import { LegacyBillingUnavailableNotice } from "./LegacyBillingUnavailableNotice";
 import type { LegacyPayment } from "./types";
 
 interface RefundModalProps {
@@ -8,7 +9,7 @@ interface RefundModalProps {
   onConfirm: () => void;
 }
 
-export function RefundModal({ item, onClose, onConfirm }: RefundModalProps) {
+export function RefundModal({ item, onClose }: RefundModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-[16px] shadow-lg w-full max-w-sm overflow-hidden flex flex-col">
@@ -24,6 +25,7 @@ export function RefundModal({ item, onClose, onConfirm }: RefundModalProps) {
             <X className="w-5 h-5" />
           </button>
         </div>
+        <LegacyBillingUnavailableNotice action="Refunds" />
         
         <div className="p-6 space-y-4">
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -43,13 +45,7 @@ export function RefundModal({ item, onClose, onConfirm }: RefundModalProps) {
           >
             Cancel
           </button>
-          <button 
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
-            className="px-4 py-2 rounded-[8px] bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors"
-          >
+          <button disabled title="Refunds are outside the approved platform billing workflow" className="px-4 py-2 rounded-[8px] bg-red-600 text-white text-sm font-medium opacity-50 cursor-not-allowed">
             Confirm Refund
           </button>
         </div>

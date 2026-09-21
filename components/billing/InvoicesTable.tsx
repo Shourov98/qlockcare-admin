@@ -1,48 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Download, Eye } from "lucide-react";
 import { invoicesData } from "./billing";
 import { Pagination } from "../common/Pagination";
-import { ViewInvoiceModal } from "./ViewInvoiceModal";
-import type { LegacyBillingInvoice } from "./types";
 
 export function InvoicesTable({ searchQuery = "" }: { searchQuery?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
 
-  const [selectedItem, setSelectedItem] = useState<LegacyBillingInvoice | null>(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-
-  const openModal = (item: LegacyBillingInvoice) => {
-    setSelectedItem(item);
-    setIsViewModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setSelectedItem(null);
-    setIsViewModalOpen(false);
-  };
-
-  const handleDownload = (item: LegacyBillingInvoice) => {
-    const content = `INVOICE\n\nNumber: ${item.invoiceNumber}\nAgency: ${item.agencyName}\nAmount: ${item.amount}\nIssue Date: ${item.issueDate}\nDue Date: ${item.dueDate}\nStatus: ${item.status}`;
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `${item.invoiceNumber}.txt`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const filteredInvoices = invoicesData.filter((inv) =>
     inv.agencyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     inv.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
 
   const totalPages = Math.ceil(filteredInvoices.length / ITEMS_PER_PAGE);
   const currentData = filteredInvoices.slice(
@@ -61,6 +29,9 @@ export function InvoicesTable({ searchQuery = "" }: { searchQuery?: string }) {
 
   return (
     <main className="bg-card rounded-[12px] shadow-[0px_1px_4px_rgba(0,0,0,0.08)] overflow-hidden">
+      <div className="border-b border-amber-200 bg-amber-50 px-6 py-3 text-sm text-amber-900">
+        Legacy invoice records are retained for layout reference. Use the active Invoice History tab for live Stripe invoices and documents.
+      </div>
       <table className="w-full text-left text-[14px] text-foreground">
         <thead className="bg-[#066a5f] text-[12px] tracking-[0.05em] font-semibold text-white uppercase border-b border-border">
           <tr>
@@ -88,16 +59,18 @@ export function InvoicesTable({ searchQuery = "" }: { searchQuery?: string }) {
               </td>
               <td className="px-6 py-4 flex space-x-2 justify-center">
                 <button
-                  onClick={() => openModal(item)}
+                  disabled
                   aria-label="View"
-                  className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground"
+                  title="Use the live invoice table for details"
+                  className="p-2 rounded-full text-muted-foreground opacity-50 cursor-not-allowed"
                 >
                   <Eye className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={() => handleDownload(item)}
+                  disabled
                   aria-label="Download"
-                  className="p-2 rounded-full hover:bg-muted/20 transition-colors text-foreground"
+                  title="Use the live invoice table for hosted invoice and PDF links"
+                  className="p-2 rounded-full text-muted-foreground opacity-50 cursor-not-allowed"
                 >
                   <Download className="w-5 h-5" />
                 </button>
@@ -115,14 +88,6 @@ export function InvoicesTable({ searchQuery = "" }: { searchQuery?: string }) {
         onPageChange={setCurrentPage}
         itemName="invoices"
       />
-
-      {isViewModalOpen && selectedItem && (
-        <ViewInvoiceModal
-          item={selectedItem}
-          onClose={closeModal}
-          onDownload={() => handleDownload(selectedItem)}
-        />
-      )}
     </main>
   );
 }
