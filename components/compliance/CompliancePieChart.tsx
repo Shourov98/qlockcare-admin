@@ -1,49 +1,76 @@
 "use client";
 
-import React from 'react';
-import { Pie } from 'react-chartjs-2';
-import { MoreHorizontal } from 'lucide-react';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { MoreHorizontal } from "lucide-react";
+import {
+  ArcElement,
+  Chart as ChartJS,
+  ChartData,
+  ChartOptions,
+  Legend,
+  Tooltip,
+  TooltipItem,
+} from "chart.js";
+import { Pie } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+type ComplianceSegment = {
+  label: string;
+  value: number;
+  color: string;
+};
+
+// This is retained sample data until the backend provides an agency-level
+// compliance distribution endpoint. It is intentionally typed separately
+// from the aggregate document and license counters already used by cards.
+const COMPLIANCE_SEGMENTS: readonly ComplianceSegment[] = [
+  { label: "Compliant", value: 75, color: "#10b981" },
+  { label: "At risk", value: 16.7, color: "#f59e0b" },
+  { label: "Critical issues", value: 8.33, color: "#ef4444" },
+];
+
+const pieChartData: ChartData<"pie", number[], string> = {
+  labels: COMPLIANCE_SEGMENTS.map((segment) => segment.label),
+  datasets: [
+    {
+      data: COMPLIANCE_SEGMENTS.map((segment) => segment.value),
+      backgroundColor: COMPLIANCE_SEGMENTS.map((segment) => segment.color),
+      borderWidth: 0,
+    },
+  ],
+};
+
+const pieChartOptions: ChartOptions<"pie"> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: "bottom",
+      labels: { usePointStyle: true, boxWidth: 8, padding: 20 },
+    },
+    tooltip: {
+      callbacks: {
+        label: (context: TooltipItem<"pie">) => `${context.label}: ${context.parsed}%`,
+      },
+    },
+  },
+  cutout: "0%",
+};
+
 export function CompliancePieChart() {
-    const pieChartData = {
-        labels: ['Compliant', 'At Risk', 'Critical Issues'],
-        datasets: [
-            {
-                data: [75, 16.7, 8.33],
-                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                borderWidth: 0,
-            },
-        ],
-    };
-
-    const pieChartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom' as const,
-                labels: { usePointStyle: true, boxWidth: 8, padding: 20 }
-            }
-        },
-        cutout: '0%'
-    };
-
-    return (
-        <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="text-base font-semibold text-foreground">Compliance Status Overview</h3>
-                <button className="text-muted-foreground hover:text-foreground transition-colors">
-                    <MoreHorizontal className="w-5 h-5" />
-                </button>
-            </div>
-            <div className="h-[280px] flex items-center justify-center relative">
-                <div className="w-full max-w-[280px] h-full">
-                    <Pie data={pieChartData} options={pieChartOptions} />
-                </div>
-            </div>
+  return (
+    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="mb-6 flex items-center justify-between">
+        <h3 className="text-base font-semibold text-foreground">Compliance status overview</h3>
+        <button type="button" aria-label="More compliance chart options" className="text-muted-foreground transition-colors hover:text-foreground">
+          <MoreHorizontal className="h-5 w-5" />
+        </button>
+      </div>
+      <div className="relative flex h-[280px] items-center justify-center">
+        <div className="h-full w-full max-w-[280px]">
+          <Pie data={pieChartData} options={pieChartOptions} />
         </div>
-    );
+      </div>
+    </div>
+  );
 }
