@@ -33,13 +33,13 @@ type TicketListItemBackend = {
 };
 
 // Mirror backend TicketResponse (with comments + author)
-type TicketAuthor = {
+export type TicketAuthor = {
   id: string;
   full_name: string;
   email: string;
 };
 
-type TicketComment = {
+export type TicketComment = {
   id: string;
   ticket_id: string;
   author_user_id: string;
@@ -50,6 +50,17 @@ type TicketComment = {
   edited_at: string | null;
   created_at: string;
   updated_at: string;
+};
+
+/**
+ * Attachments are represented by ATTACHMENT timeline entries. The API does
+ * not currently prescribe an upload provider, so URLs remain optional.
+ */
+export type TicketAttachment = {
+  commentId: string;
+  name: string;
+  url: string | null;
+  createdAt: string;
 };
 
 type TicketBackend = Omit<TicketListItemBackend, "attachment_count"> & {
@@ -85,6 +96,36 @@ export type TicketDetail = Ticket & {
   comments: TicketComment[];
   deletedAt: string | null;
 };
+
+function metadataString(
+  metadata: Record<string, unknown>,
+  keys: string[],
+): string | null {
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === "string" && value.trim()) return value;
+  }
+  return null;
+}
+
+export function ticketAttachments(
+  comments: TicketComment[],
+): TicketAttachment[] {
+  return comments.flatMap((comment) => {
+    if (comment.kind !== "ATTACHMENT") return [];
+
+    return [
+      {
+        commentId: comment.id,
+        name:
+          metadataString(comment.event_metadata, ["file_name", "filename", "name"]) ??
+          comment.body,
+        url: metadataString(comment.event_metadata, ["url", "file_url", "download_url"]),
+        createdAt: comment.created_at,
+      },
+    ];
+  });
+}
 
 export type TicketListResult = {
   data: Ticket[];
@@ -170,7 +211,7 @@ function mapDetail(t: TicketBackend): TicketDetail {
     agencyId: t.agency_id,
     reporterId: t.reporter_user_id,
     assigneeId: t.assignee_user_id,
-    attachmentCount: 0,
+    attachmentCount: ticketAttachments(t.comments).length,
     createdAt: formatDate(t.created_at),
     updatedAt: formatDate(t.updated_at),
     deletedAt: t.deleted_at,
