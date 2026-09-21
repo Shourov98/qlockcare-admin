@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect -- modal fields mirror the selected agency. */
 import React, { useState } from "react";
 import { ApiError } from "@/lib/api";
 import {

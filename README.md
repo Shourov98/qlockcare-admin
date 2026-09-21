@@ -48,6 +48,9 @@ The application strictly adheres to a premium, modern design system focusing on:
 
 ## 🛠️ Technologies & Architecture
 
+Component ownership, API-integration boundaries, and refactoring rules are
+documented in [Component Strategy](docs/COMPONENT_STRATEGY.md).
+
 - **Core Framework:** [Next.js](https://nextjs.org/) (Utilizing the App Router for nested layouts and Server Components).
 - **Build Engine:** Turbopack for lightning-fast local development and optimized production builds.
 - **Frontend Library:** [React 18+](https://react.dev/) leveraging modern hooks for state management.

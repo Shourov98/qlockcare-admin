@@ -1,6 +1,7 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect -- effects load the active page and filters. */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Eye, Edit, Trash2, Search, ChevronDown, Loader2 } from 'lucide-react';
 import { Pagination } from '@/components/common/Pagination';
 import { TicketViewModal } from './TicketViewModal';

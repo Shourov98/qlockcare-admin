@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect -- effect loads the current server page. */
 
 import React, { useEffect, useState } from 'react';
 import { Search, Download, Plus, Loader2 } from 'lucide-react';
@@ -9,8 +10,6 @@ import {
     LICENSE_STATUS_LABEL,
     LicenseStatus,
     daysUntilColor,
-    deleteLicense,
-    documentStatusColor,
     DOCUMENT_TYPE_LABEL,
     licenseStatusColor,
     listLicenses,

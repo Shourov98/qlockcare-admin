@@ -1,9 +1,10 @@
 import React from 'react';
+import type { AgencyDocument } from '../compliance/compliance';
 
 interface MissingDocRequestModalProps {
     isOpen: boolean;
     onClose: () => void;
-    doc: any;
+    doc: AgencyDocument | null;
 }
 
 export function MissingDocRequestModal({ isOpen, onClose, doc }: MissingDocRequestModalProps) {
@@ -16,17 +17,17 @@ export function MissingDocRequestModal({ isOpen, onClose, doc }: MissingDocReque
                 <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); onClose(); }}>
                     <div>
                         <label className="block text-sm font-medium mb-1 text-foreground">To Agency</label>
-                        <input type="text" value={doc.agency} disabled className="w-full border border-border rounded-md px-3 py-2 bg-muted text-foreground cursor-not-allowed" />
+                        <input type="text" value={doc.agencyId} disabled className="w-full border border-border rounded-md px-3 py-2 bg-muted text-foreground cursor-not-allowed" />
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1 text-foreground">Subject</label>
-                        <input type="text" defaultValue={`Action Required: Missing Documents for ${doc.agency}`} className="w-full border border-border rounded-md px-3 py-2 bg-card text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                        <input type="text" defaultValue={`Action Required: ${doc.name}`} className="w-full border border-border rounded-md px-3 py-2 bg-card text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1 text-foreground">Message</label>
                         <textarea 
                             rows={4} 
-                            defaultValue={`Please review and upload the following missing documents to maintain compliance:\n\n- ${doc.missingList.split(', ').join('\n- ')}\n\nThank you.`}
+                            defaultValue={`Please review and upload the required ${doc.docType.toLowerCase()} document, ${doc.name}, to maintain compliance.\n\nThank you.`}
                             className="w-full border border-border rounded-md px-3 py-2 bg-card text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                         />
                     </div>

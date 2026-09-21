@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Search, ChevronDown, Info } from "lucide-react";
-import { BillingTable } from "./BillingTable";
+import { PlatformSubscriptionsTable } from "./PlatformSubscriptionsTable";
 
 interface SubscriptionsTabProps {
   searchQuery: string;
@@ -8,17 +8,9 @@ interface SubscriptionsTabProps {
 }
 
 /**
- * Subscriptions tab. Replaces the prior mock data + BillingSummaryCards
- * with a real listing of agencies pulled from `GET /agencies`. Per-row
- * actions go to Stripe (Customer Portal for plan / payment management,
- * or a new Checkout session for a plan upgrade).
- *
- * Why this view exists: the backend already exposes `/agencies` with
- * subscription_plan, status, stripe_customer_id, etc. The remaining
- * 4 tabs (Invoices, Payments, Trials, Plans & Coupons) require new
- * backend endpoints (per the audit); they're stubbed with an honest
- * "Pending backend" banner on the BillingPage until those endpoints
- * exist.
+ * Platform read model for subscription lifecycle. Agencies manage their own
+ * billing through their customer portal; platform staff can inspect renewal,
+ * trial, and payment state without initiating an agency checkout.
  */
 export function SubscriptionsTab({
   searchQuery,
@@ -31,12 +23,10 @@ export function SubscriptionsTab({
       <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-100 rounded-[12px] text-blue-700 text-sm">
         <Info className="w-4 h-4 mt-0.5 shrink-0" />
         <div>
-          <p className="font-semibold">Subscription management via Stripe</p>
+          <p className="font-semibold">Subscription lifecycle from Stripe</p>
           <p className="text-xs mt-1">
-            Plan changes and billing detail happen in each agency's Stripe
-            Customer Portal. "Manage" opens that portal; "Change plan" starts
-            a fresh Checkout session. To see aggregate MRR / failed payments
-            across all agencies, enable <code className="px-1 bg-blue-100 rounded">/admin/billing/*</code> on the backend.
+            This platform view is read-only. Agencies update payment methods,
+            plans, and invoices through their own Stripe Customer Portal.
           </p>
         </div>
       </div>
@@ -71,7 +61,11 @@ export function SubscriptionsTab({
             </div>
           </div>
         </div>
-        <BillingTable searchQuery={searchQuery} statusFilter={statusFilter} />
+        <PlatformSubscriptionsTable
+          key={`${searchQuery}:${statusFilter}`}
+          searchQuery={searchQuery}
+          statusFilter={statusFilter}
+        />
       </div>
     </div>
   );

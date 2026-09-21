@@ -1,10 +1,8 @@
 import { PlatformBillingTable } from "./PlatformBillingTable";
 
 /**
- * Same pattern as InvoicesTab — no fake transaction rows. The
- * `RefundModal` and `SendEmailModal` referenced from the old
- * `PaymentsTable` are kept available for the day this view goes
- * live; they're not imported here so the empty state stays minimal.
+ * Payment data is loaded from Stripe through the platform billing API.
+ * Refunds and outbound billing email are intentionally outside this console.
  */
 export function PaymentsTab() {
   return (

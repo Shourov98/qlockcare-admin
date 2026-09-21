@@ -3,8 +3,8 @@ import { PlatformBillingTable } from "./PlatformBillingTable";
 /**
  * Plans & Coupons used to render two fabricated grids (sample plans
  * and sample coupons) sourced from `components/billing/billing.ts`.
- * Now shows an honest empty state per surface so the developer
- * reading the UI knows the data isn't real.
+ * Prices are backed by Stripe. Coupons remain read-only because promotion
+ * management is intentionally outside the current platform billing scope.
  */
 export function PlansAndCoupons() {
   return (

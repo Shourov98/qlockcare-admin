@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect -- modal form state follows the requested ticket. */
 
 import React, { useEffect, useState } from 'react';
 import { X, Loader2 } from 'lucide-react';

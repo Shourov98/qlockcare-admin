@@ -1,8 +1,23 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect -- form state is initialized from the authenticated account. */
 
 import React, { useEffect, useState } from 'react';
-import { User, Mail, Shield, BadgeCheck, Loader2, Save } from 'lucide-react';
+import { Mail, Shield, BadgeCheck, Loader2, Save, type LucideIcon } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
+
+function ProfileField({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
+      <div className="relative">
+        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <div className="w-full bg-muted/20 border border-border rounded-lg pl-9 pr-4 py-2.5 text-sm text-foreground">
+          {value || <span className="text-muted-foreground italic">Not set</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Read-only display of the signed-in admin's account.
@@ -23,6 +38,7 @@ export function ProfileSettings() {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
+  // Form state is initialized from the authenticated account when it loads.
   useEffect(() => {
     setFullName(user?.full_name ?? "");
     setPhone(user?.phone ?? "");
@@ -66,28 +82,6 @@ export function ProfileSettings() {
       : (user.role ?? "Unknown role");
 
   const initial = (user.full_name || user.email || "?").trim().charAt(0).toUpperCase();
-
-  const Field = ({
-    icon: Icon,
-    label,
-    value,
-  }: {
-    icon: typeof User;
-    label: string;
-    value: React.ReactNode;
-  }) => (
-    <div>
-      <label className="block text-sm font-medium text-foreground mb-1">
-        {label}
-      </label>
-      <div className="relative">
-        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <div className="w-full bg-muted/20 border border-border rounded-lg pl-9 pr-4 py-2.5 text-sm text-foreground">
-          {value || <span className="text-muted-foreground italic">Not set</span>}
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
@@ -133,7 +127,7 @@ export function ProfileSettings() {
                 className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground"
               />
             </div>
-            <Field icon={Mail} label="Email Address" value={user.email} />
+            <ProfileField icon={Mail} label="Email Address" value={user.email} />
             <div>
               <label className="block text-sm font-medium text-foreground mb-1" htmlFor="profile-phone">
                 Phone Number
@@ -150,7 +144,7 @@ export function ProfileSettings() {
             {saved ? <p className="text-sm text-emerald-700">Profile changes saved.</p> : null}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field
+              <ProfileField
                 icon={Shield}
                 label="Role"
                 value={
@@ -164,7 +158,7 @@ export function ProfileSettings() {
                   </span>
                 }
               />
-              <Field
+              <ProfileField
                 icon={BadgeCheck}
                 label="Email Verified"
                 value={

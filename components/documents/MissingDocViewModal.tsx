@@ -1,16 +1,15 @@
 import React from 'react';
 import { FileText, AlertTriangle } from 'lucide-react';
+import type { AgencyDocument } from '../compliance/compliance';
 
 interface MissingDocViewModalProps {
     isOpen: boolean;
     onClose: () => void;
-    doc: any;
+    doc: AgencyDocument | null;
 }
 
 export function MissingDocViewModal({ isOpen, onClose, doc }: MissingDocViewModalProps) {
     if (!isOpen || !doc) return null;
-
-    const missingItems = doc.missingList.split(', ');
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
@@ -21,20 +20,18 @@ export function MissingDocViewModal({ isOpen, onClose, doc }: MissingDocViewModa
                     </div>
                     <div>
                         <h2 className="text-xl font-bold text-foreground">Missing Document Details</h2>
-                        <p className="text-sm text-muted-foreground">{doc.agency}</p>
+                        <p className="text-sm text-muted-foreground">Agency ID: {doc.agencyId}</p>
                     </div>
                 </div>
                 
                 <div className="space-y-4">
                     <div>
-                        <h4 className="text-sm font-semibold text-foreground mb-2">Documents Required ({doc.missingCount})</h4>
+                        <h4 className="text-sm font-semibold text-foreground mb-2">Document required</h4>
                         <ul className="space-y-2">
-                            {missingItems.map((item: string, idx: number) => (
-                                <li key={idx} className="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted/30">
+                                <li className="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted/30">
                                     <FileText className="w-4 h-4 text-muted-foreground" />
-                                    <span className="text-sm text-foreground">{item}</span>
+                                    <span className="text-sm text-foreground">{doc.name} ({doc.docType})</span>
                                 </li>
-                            ))}
                         </ul>
                     </div>
                 </div>

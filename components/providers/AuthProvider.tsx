@@ -75,7 +75,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [assertDashboardRole, dispatch, getMe]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadCurrentUser().catch(() => {
       dispatch(sessionCleared());
     });

@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import {
   Building2,
-  ShieldAlert,
   Users,
   DollarSign,
 } from "lucide-react";

@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect -- effect loads the current server page. */
 
 import React, { useEffect, useState } from 'react';
 import { FileText, Search, Plus, Loader2 } from 'lucide-react';

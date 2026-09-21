@@ -87,7 +87,7 @@ export function SecuritySettings() {
                     {success && (
                         <div className="flex items-center gap-2 bg-green-500/10 text-green-700 border border-green-200 rounded-lg p-3 text-sm">
                             <CheckCircle2 className="w-4 h-4" />
-                            Password updated successfully. You'll be signed out of other devices shortly.
+                            Password updated successfully. You&apos;ll be signed out of other devices shortly.
                         </div>
                     )}
                     {error && (

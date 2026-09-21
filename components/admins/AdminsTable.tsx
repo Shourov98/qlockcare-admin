@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect -- pagination resets when external filters change. */
 import React, { useEffect, useState } from "react";
 import { Eye, Edit, Trash2, UserPlus } from "lucide-react";
 import {

@@ -93,7 +93,7 @@ export function AdminAddModal({ isOpen, onClose, onAdd }: AdminAddModalProps) {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-[28rem] p-6 max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-semibold mb-2">Add Platform Admin</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          They'll receive an invitation email and choose their own password.
+          They&apos;ll receive an invitation email and choose their own password.
           Pick at least one scope to grant on creation.
         </p>
         <form className="space-y-4" onSubmit={handleSubmit}>
