@@ -57,6 +57,7 @@ export default function StaffPage() {
           </div>
         </div>
         <StaffTable
+          key={`${searchQuery}:${statusFilter}`}
           searchQuery={searchQuery}
           statusFilter={statusFilter}
         />

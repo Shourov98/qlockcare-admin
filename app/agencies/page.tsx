@@ -62,6 +62,7 @@ export default function AgenciesPage() {
           </div>
         </div>
         <AgenciesTable
+          key={`${searchQuery}:${statusFilter}`}
           searchQuery={searchQuery}
           statusFilter={statusFilter}
         />

@@ -70,12 +70,6 @@ export function ClientsTable({
     load();
   }, [load]);
 
-  // Reset to first page whenever the filter changes
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCurrentPage(1);
-  }, [searchQuery, statusFilter]);
-
   const totalPages = Math.max(Math.ceil(totalItems / ITEMS_PER_PAGE), 1);
 
   return (

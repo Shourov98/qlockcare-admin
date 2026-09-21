@@ -85,11 +85,6 @@ export default function AuditLogsPage() {
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPage(1);
-  }, [action, entityType, dateFrom, dateTo]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, [load]);
 
@@ -98,6 +93,27 @@ export default function AuditLogsPage() {
     setEntityType("");
     setDateFrom("");
     setDateTo("");
+    setPage(1);
+  };
+
+  const updateAction = (value: "" | AuditAction) => {
+    setAction(value);
+    setPage(1);
+  };
+
+  const updateEntityType = (value: string) => {
+    setEntityType(value);
+    setPage(1);
+  };
+
+  const updateDateFrom = (value: string) => {
+    setDateFrom(value);
+    setPage(1);
+  };
+
+  const updateDateTo = (value: string) => {
+    setDateTo(value);
+    setPage(1);
   };
 
   return (
@@ -120,7 +136,7 @@ export default function AuditLogsPage() {
             </label>
             <select
               value={action}
-              onChange={(e) => setAction(e.target.value as "" | AuditAction)}
+              onChange={(e) => updateAction(e.target.value as "" | AuditAction)}
               className="border border-border rounded-md px-3 py-1.5 bg-white text-sm"
             >
               <option value="">Any</option>
@@ -137,7 +153,7 @@ export default function AuditLogsPage() {
             </label>
             <select
               value={entityType}
-              onChange={(e) => setEntityType(e.target.value)}
+              onChange={(e) => updateEntityType(e.target.value)}
               className="border border-border rounded-md px-3 py-1.5 bg-white text-sm"
             >
               <option value="">Any</option>
@@ -155,7 +171,7 @@ export default function AuditLogsPage() {
             <input
               type="date"
               value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
+              onChange={(e) => updateDateFrom(e.target.value)}
               className="border border-border rounded-md px-3 py-1.5 bg-white text-sm"
             />
           </div>
@@ -166,7 +182,7 @@ export default function AuditLogsPage() {
             <input
               type="date"
               value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
+              onChange={(e) => updateDateTo(e.target.value)}
               className="border border-border rounded-md px-3 py-1.5 bg-white text-sm"
             />
           </div>

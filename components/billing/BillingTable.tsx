@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect -- list refreshes when page or external filters change. */
 import React, { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Pagination } from "../common/Pagination";
@@ -52,6 +51,22 @@ export function BillingTable({
   searchQuery?: string;
   statusFilter?: string;
 }) {
+  return (
+    <BillingTableContent
+      key={`${searchQuery}:${statusFilter}`}
+      searchQuery={searchQuery}
+      statusFilter={statusFilter}
+    />
+  );
+}
+
+function BillingTableContent({
+  searchQuery,
+  statusFilter,
+}: {
+  searchQuery: string;
+  statusFilter: string;
+}) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
   const [data, setData] = useState<PaginatedAgencies | null>(null);
@@ -82,12 +97,8 @@ export function BillingTable({
   };
 
   useEffect(() => {
-    setCurrentPage(1);
-    void fetchPage(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, statusFilter]);
-
-  useEffect(() => {
+    // Remote loading updates local request state after the effect starts.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchPage(currentPage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);

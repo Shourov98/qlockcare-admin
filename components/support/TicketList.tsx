@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable react-hooks/set-state-in-effect -- effects load the active page and filters. */
 
 import React, { useEffect, useState } from 'react';
 import { Eye, Edit, Trash2, Search, ChevronDown, Loader2 } from 'lucide-react';
@@ -76,6 +75,8 @@ export function TicketList() {
     };
 
     useEffect(() => {
+        // Remote loading updates local request state after the effect starts.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         refresh();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]);
@@ -106,6 +107,8 @@ export function TicketList() {
     // Trigger refresh after filter changes (the useEffect on `page` won't fire
     // because page may already be 1; this explicit effect covers it).
     useEffect(() => {
+        // Remote loading updates local request state after the effect starts.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         refresh();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchQuery, statusFilter, priorityFilter]);

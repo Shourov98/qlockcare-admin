@@ -55,6 +55,7 @@ export default function ClientsPage() {
           </div>
         </div>
         <ClientsTable
+          key={`${searchQuery}:${statusFilter}`}
           searchQuery={searchQuery}
           statusFilter={statusFilter}
         />

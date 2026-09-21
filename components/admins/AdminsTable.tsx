@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect -- pagination resets when external filters change. */
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Eye, Edit, Trash2, UserPlus } from "lucide-react";
 import {
   Admin,
@@ -40,10 +39,6 @@ export function AdminsTable({ searchQuery = "" }: { searchQuery?: string }) {
   const adminRows = data?.data ?? [];
   const totalItems = data?.pagination.total ?? 0;
   const totalPages = Math.max(data?.pagination.total_pages ?? 1, 1);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
 
   const openView = (admin: Admin) => {
     setSelectedAdmin(admin);
